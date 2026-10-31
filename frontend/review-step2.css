@@ -1,0 +1,66 @@
+/* Additive Review workspace. Uses the existing Jobup dark/light design tokens. */
+#view-triage{max-width:1650px;margin:0 auto}
+#view-triage .triage-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 14px}
+#view-triage .triage-heading h2{font-size:21px;letter-spacing:-.4px;margin:0}
+#view-triage .triage-heading p{font-size:12px;color:var(--muted);margin:5px 0 0}
+#view-triage .triage-actions{display:flex;gap:7px}
+#view-triage .triage-filters{display:flex;align-items:end;gap:9px;flex-wrap:wrap;border:1px solid var(--border);background:var(--panel);border-radius:11px;padding:12px;margin-bottom:11px}
+#view-triage .triage-filters label{display:grid;gap:5px;font-size:11px;color:var(--muted)}
+#view-triage .triage-filters input,#view-triage .triage-filters select{min-width:85px;max-width:230px;width:100%;padding:7px;font-size:12px}
+#view-triage .triage-filters label:first-child input{width:185px}
+#view-triage .triage-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;font-size:12px;color:var(--muted)}
+#view-triage .triage-summary>div{display:flex;gap:7px}
+#view-triage #triage-message{color:var(--muted);font-size:12px;margin:6px 0 12px;min-height:19px}
+#view-triage #triage-message[data-error]{color:var(--skip)}
+#view-triage .triage-workspace{display:grid;grid-template-columns:minmax(360px,.92fr) minmax(400px,1.08fr);gap:12px;align-items:start}
+#view-triage .triage-list,#view-triage .triage-detail{border:1px solid var(--border);background:var(--panel);border-radius:12px;min-width:0}
+#view-triage .triage-list{overflow:hidden}
+#view-triage .triage-list-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600}
+#view-triage .triage-list-head small{margin-left:auto;font-size:10px;color:var(--muted);font-weight:400}
+#view-triage #triage-items{overflow:auto;max-height:calc(100vh - 355px);min-height:280px}
+#view-triage .triage-row{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-bottom:1px solid var(--border);cursor:pointer}
+#view-triage .triage-row.selected{background:color-mix(in srgb,var(--accent) 12%,var(--panel));box-shadow:inset 3px 0 var(--accent)}
+#view-triage .triage-row:hover{background:var(--panel2)}
+#view-triage .triage-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#view-triage .triage-row-main{min-width:0;flex:1}
+#view-triage .triage-row-main strong{display:block;font-size:12.5px;line-height:1.5}
+#view-triage .triage-meta{color:var(--muted);font-size:11.5px;margin:5px 0;overflow-wrap:anywhere}
+#view-triage .triage-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+#view-triage .triage-tag{border:1px solid var(--border);background:var(--panel2);font-size:10px;padding:2px 7px;border-radius:999px}
+#view-triage .triage-tag.eligible{color:var(--ok)}
+#view-triage .triage-tag.excluded{color:var(--skip)}
+#view-triage .triage-tag.unverified{color:var(--warn)}
+#view-triage .triage-tag.duplicate{color:var(--warn)}
+#view-triage .triage-date{color:var(--muted);font-size:11px;white-space:nowrap}
+#view-triage #triage-more{width:100%;border:0;border-top:1px solid var(--border);border-radius:0}
+#view-triage .triage-detail{padding:20px;position:sticky;top:80px;max-height:calc(100vh - 120px);overflow:auto;min-height:420px}
+#view-triage .triage-detail h3{font-size:19px;margin:8px 0;line-height:1.4}
+#view-triage .triage-detail h4{color:var(--muted);font-size:11px;letter-spacing:.05em;text-transform:uppercase;margin:22px 0 8px}
+#view-triage .triage-eyebrow{color:var(--accent);font-size:12px;font-weight:600}
+#view-triage .triage-reason{line-height:1.6}
+#view-triage .triage-evidence{font-size:11px;white-space:pre-wrap;word-break:break-word;background:var(--panel2);padding:12px;border:1px solid var(--border);border-radius:8px;max-height:150px;overflow:auto}
+#view-triage .triage-description{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px;line-height:1.8;max-height:40vh;overflow:auto}
+#view-triage .triage-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 14px}
+#view-triage .triage-note-label{display:grid;gap:8px;color:var(--muted);font-size:12px}
+#view-triage .triage-note-label textarea{width:100%;resize:vertical;min-height:65px}
+#view-triage .triage-safety,#view-triage .triage-dup-notice{border-left:3px solid var(--warn);padding:9px 11px;background:var(--panel2);font-size:12px;line-height:1.6}
+#view-triage .triage-workspace.table-mode{grid-template-columns:1fr}
+#view-triage .triage-workspace.table-mode .triage-detail{display:none}
+#view-triage .triage-workspace.table-mode #triage-items{max-height:65vh}
+@media(max-width:1190px){#view-triage .triage-workspace{grid-template-columns:1fr}#view-triage .triage-detail{position:static;max-height:none}#view-triage #triage-items{max-height:460px}}
+@media(max-width:680px){#view-triage .triage-heading{align-items:start;flex-direction:column}#view-triage .triage-summary{align-items:start;flex-direction:column}#view-triage .triage-list-head small{display:none}}
+
+/* Priority review filter. Visual grouping is not an eligibility verdict. */
+#view-triage .triage-explain{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 12px;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:var(--panel2)}
+#view-triage .triage-explain strong{color:var(--fg)}
+#view-triage .triage-overview{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:9px;margin-bottom:13px}
+#view-triage .triage-overview-item{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+#view-triage .triage-overview-item strong{font-size:19px;font-variant-numeric:tabular-nums;color:var(--fg)}
+#view-triage .triage-overview-item small{font-size:10px;color:var(--muted)}
+#view-triage .triage-overview-item.priority strong{color:var(--accent)}
+#view-triage .triage-overview-item.eligible strong{color:var(--ok)}
+#view-triage .triage-overview-item.unverified strong{color:var(--warn)}
+#view-triage .triage-overview-item.excluded strong{color:var(--skip)}
+#view-triage #triage-show-all{margin:0 0 12px;color:var(--accent)}
+@media(max-width:1200px){#view-triage .triage-overview{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+@media(max-width:720px){#view-triage .triage-overview{grid-template-columns:repeat(2,minmax(120px,1fr))}}

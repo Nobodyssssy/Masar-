@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masar (مسار) — Recherche & Candidatures</title>
+<style>
+:root{
+  --bg:#16181c; --panel:#1e2126; --panel2:#23262c; --border:#2e3238;
+  --fg:#e8eaed; --muted:#8b9095; --accent:#4ea1ff; --accent2:#7fbcff;
+  --ok:#4ade80; --skip:#f87171; --warn:#fbbf24;
+}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.5 system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--fg)}
+button,input,select,textarea{font:inherit}
+input,select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:4px;padding:5px 8px}
+button{background:var(--panel);color:var(--fg);border:1px solid var(--border);border-radius:5px;padding:6px 11px;cursor:pointer;transition:border-color .12s}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:#3a92e8}
+button.ghost{background:transparent}
+button.apply{color:var(--ok)}
+button.skip{color:var(--skip)}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2);text-decoration:underline}
+
+header.top{position:sticky;top:0;z-index:30;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
+header.top h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.2px}
+.tabs{display:flex;gap:2px;margin-left:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px}
+.tab{background:transparent;border:none;color:var(--muted);padding:5px 14px;border-radius:6px;cursor:pointer;font-weight:500}
+.tab:hover{color:var(--fg)}
+.tab.active{background:var(--panel2);color:var(--fg)}
+.spacer{flex:1}
+.count{color:var(--muted);font-size:12px;margin-left:6px}
+
+main{padding:16px 18px 60px}
+.view{display:none}
+.view.active{display:block}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--panel);
+  border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
+.filters label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}
+.filters input[type=text]{width:240px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-weight:500;position:sticky;top:0;background:var(--bg);z-index:1}
+tr.applied{background:rgba(78,161,255,.06)}
+tr.skipped{background:rgba(248,113,113,.06)}
+tr.applied td,tr.skipped td{color:var(--muted)}
+.grade{color:var(--warn);font-weight:600}
+.date{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{width:100%;min-width:180px;min-height:30px;resize:vertical;font-size:12px}
+.actions{white-space:nowrap;display:flex;gap:4px}
+.empty{color:var(--muted);padding:50px;text-align:center;border:1px dashed var(--border);border-radius:8px}
+.title-cell{display:flex;align-items:center;gap:10px}
+.title-cell .title{font-weight:600;flex:1;min-width:0}
+.title-cell .link{flex-shrink:0;padding:3px 8px;background:var(--accent);color:#fff;border-radius:4px;
+  font-size:11px;text-decoration:none;white-space:nowrap}
+.title-cell .link:hover{background:#3a92e8;color:#fff;text-decoration:none}
+table td:nth-child(2){min-width:320px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;
+  border:1px solid var(--border);background:var(--panel2);white-space:nowrap}
+.pill .dot{width:6px;height:6px;border-radius:50%}
+
+.dash{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.card h3{margin:0 0 10px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.stat .num{font-size:26px;font-weight:700;line-height:1.1}
+.stat .sub{color:var(--muted);font-size:11px;margin-top:3px}
+.stat.trend .num{color:var(--accent)}
+.stat.ok .num{color:var(--ok)}
+.stat.warn .num{color:var(--warn)}
+
+.grid2{display:grid;grid-template-columns:minmax(260px,1fr) 2fr;gap:12px;margin-bottom:16px}
+.dash-row-cal{display:grid;grid-template-columns:minmax(0,640px) 1fr;gap:12px;margin-bottom:16px}
+@media (max-width:1000px){.dash-row-cal{grid-template-columns:1fr}}
+@media (max-width:900px){.dash{grid-template-columns:repeat(2,1fr)} .grid2{grid-template-columns:1fr}}
+
+/* Getting started */
+.getstarted{background:linear-gradient(135deg,rgba(78,161,255,.08),rgba(78,161,255,.02));
+  border:1px solid rgba(78,161,255,.35);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.getstarted h2{margin:0 0 10px;font-size:14px}
+.getstarted ol{margin:0 0 12px;padding-left:22px;font-size:12.5px;line-height:1.7}
+.getstarted ol code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:3px;font-family:monospace;font-size:11.5px}
+.getstarted .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Pie */
+.pie-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.pie-head h3{margin:0}
+.period-tabs{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}
+.period-tabs button{background:transparent;border:none;color:var(--muted);padding:3px 10px;border-radius:4px;
+  font-size:11px;cursor:pointer;font-weight:500}
+.period-tabs button:hover{color:var(--fg)}
+.period-tabs button.active{background:var(--panel2);color:var(--fg)}
+.pie-period{color:var(--muted);font-size:11px;margin-bottom:8px}
+.pie-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pie-wrap svg{flex-shrink:0}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.legend .row{display:grid;grid-template-columns:10px max-content auto;gap:8px;align-items:center}
+.legend .sw{width:10px;height:10px;border-radius:2px}
+.legend .val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;padding-left:12px}
+
+/* Bars */
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px;padding-top:6px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar .stack{width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:100px;position:relative}
+.bar .seg{width:100%;background:var(--accent);border-radius:2px 2px 0 0;transition:opacity .15s}
+.bar .seg:hover{opacity:.8}
+.bar .lbl{font-size:10px;color:var(--muted);white-space:nowrap}
+.bar .n{font-size:11px;font-weight:600}
+.bar .n.zero{color:var(--muted);font-weight:400}
+
+/* Calendar */
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cal-head .title{font-weight:600;flex:1;font-size:13px;min-width:120px}
+.cal-head button{padding:2px 8px;font-size:12px}
+.cal-head select{padding:3px 6px;font-size:11.5px}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;color:var(--muted);font-size:10.5px;
+  text-align:center;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-cell{position:relative;height:52px;background:var(--panel2);border-radius:6px;padding:4px 6px;
+  cursor:pointer;display:flex;font-size:11px;border:1.5px solid transparent;transition:transform .1s,border-color .12s,box-shadow .12s;
+  overflow:visible}
+.cal-cell:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.28);border-color:var(--accent);z-index:5}
+.cal-cell.empty{background:transparent;cursor:default;border-color:transparent}
+.cal-cell.empty:hover{transform:none;box-shadow:none;border-color:transparent}
+.cal-cell .num{color:var(--muted);font-weight:500;line-height:1;position:relative;z-index:2}
+.cal-cell.has .num{color:#fff;font-weight:600}
+.cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--warn)}
+.cal-cell .chips{position:absolute;top:3px;right:5px;display:flex;align-items:center;gap:3px;
+  font-size:11.5px;font-weight:700;line-height:1;z-index:2;letter-spacing:-.2px}
+.cal-cell .chips .sep{opacity:.35;font-weight:400;color:#fff;font-size:9px}
+.cal-cell .chips b{font-weight:700}
+.cal-cell .stripe{position:absolute;bottom:0;left:0;right:0;height:3px;display:flex;border-radius:0 0 5px 5px;overflow:hidden}
+.cal-cell .stripe span{height:100%}
+.cal-cell .tooltip{position:absolute;left:50%;bottom:100%;transform:translateX(-50%) translateY(4px);
+  margin-bottom:6px;background:#0f1114;border:1px solid var(--border);border-radius:6px;padding:6px 8px;
+  font-size:11px;line-height:1.4;z-index:30;opacity:0;pointer-events:none;
+  transition:opacity .12s,transform .12s;box-shadow:0 8px 20px rgba(0,0,0,.55);white-space:nowrap}
+.cal-cell:hover .tooltip{opacity:1;transform:translateX(-50%) translateY(0)}
+.cal-cell .tooltip .tt-row{display:flex;align-items:center;gap:6px}
+.cal-cell .tooltip .dot2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cal-cell .tooltip .tt-n{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted)}
+.cal-legend .lg{display:flex;align-items:center;gap:5px}
+.cal-legend .lg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+.follow-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto}
+.follow-item{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;background:var(--panel2);font-size:12px}
+.follow-item .when{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.follow-item .who{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.follow-item.due{border-left:3px solid var(--warn)}
+.follow-item.late{border-left:3px solid var(--skip)}
+
+.drawer{position:fixed;top:0;right:0;width:560px;max-width:92vw;height:100vh;background:var(--panel);
+  border-left:1px solid var(--border);box-shadow:-20px 0 40px rgba(0,0,0,.4);
+  transform:translateX(100%);transition:transform .22s ease;z-index:50;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.drawer header h2{margin:0;font-size:14px;flex:1}
+.drawer .body{padding:14px 18px;overflow:auto;flex:1}
+.drawer .filters{padding:8px 10px;margin:0 0 12px}
+.day-job{padding:10px 11px;background:var(--panel2);border-radius:7px;margin-bottom:8px;font-size:12px;
+  display:flex;flex-direction:column;gap:5px;border:1px solid transparent}
+.day-job:hover{border-color:var(--border)}
+.day-job .t{font-weight:600}
+.day-job .m{color:var(--muted);font-size:11px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.day-job a{color:var(--accent)}
+.day-job .quick{display:flex;gap:6px;align-items:center;margin-top:2px}
+.day-job .quick select{padding:2px 6px;font-size:11px;background:var(--bg)}
+.day-job .quick button{padding:2px 9px;font-size:11px}
+
+select.status-select{background:var(--panel2);border:1px solid var(--border);padding:3px 6px;border-radius:5px;font-size:11px;
+  font-weight:600;color:var(--fg);cursor:pointer}
+.tracker input[type=date]{padding:2px 5px;font-size:11px}
+.tracker textarea{min-height:28px;font-size:12px}
+
+.hint{color:var(--muted);font-size:11.5px}
+.kbd{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:monospace;font-size:11px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 16px;z-index:100;
+  transition:all .2s;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--ok);color:var(--ok)}
+.toast.err{border-color:var(--skip);color:var(--skip)}
+
+/* Jobup desktop design system — mockup-aligned, feature-preserving */
+:root{--bg:#0b111a;--panel:#111b28;--panel2:#162230;--border:#263648;--fg:#e9eef7;--muted:#9aa9bc;--accent:#4d9bff;--accent2:#76b5ff;--ok:#42d991;--warn:#efbb58;--skip:#fa7886;--nav:#0f1722}
+:root[data-theme="light"]{--bg:#f4f7fb;--panel:#fff;--panel2:#f5f8fc;--border:#e1e8f0;--fg:#162333;--muted:#64748b;--accent:#1673da;--accent2:#0a5ebb;--ok:#167f50;--warn:#996008;--skip:#bc3449;--nav:#fff}
+body{min-height:100vh;background:var(--bg);color:var(--fg)}
+button,input,select,textarea{border-radius:8px}
+button{min-height:32px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.top{margin-left:222px;top:0;padding:14px 28px;gap:10px;min-height:68px;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:0 3px 12px rgba(0,0,0,.04)}
+header.top h1{font-size:20px;letter-spacing:-.4px;margin-right:auto}
+header.top>.tabs{display:none}
+main{margin-left:222px;padding:24px 28px 70px;max-width:none}
+.view{max-width:1600px;margin:0 auto}
+.card,.filters{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.card{padding:17px}.card h3{letter-spacing:.02em}
+.dash{gap:12px}.dash .card{min-height:104px}
+th{background:var(--panel);color:var(--muted)}td{border-color:var(--border)}tbody tr:hover{background:var(--panel2)}
+.desktop-sidebar{position:fixed;inset:0 auto 0 0;width:222px;z-index:45;display:flex;flex-direction:column;padding:16px 12px;background:var(--nav);border-right:1px solid var(--border)}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:5px 11px 22px;font-size:16px;font-weight:700;letter-spacing:-.2px}
+.sidebar-mark{background:var(--accent);color:white;border-radius:8px;display:grid;place-items:center;font-size:14px;height:28px;width:28px}
+.sidebar-nav{display:grid;gap:5px}.side-link{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:1px solid transparent;background:transparent;color:var(--muted);font-weight:550;padding:10px 12px;min-height:41px}
+.side-link:hover{background:var(--panel2);color:var(--fg)}.side-link.active{background:color-mix(in srgb,var(--accent) 14%,var(--panel));border-color:color-mix(in srgb,var(--accent) 27%,var(--border));color:var(--fg)}
+.side-icon{font-size:16px;min-width:20px;text-align:center}.sidebar-foot{margin-top:auto;padding:13px 9px;color:var(--muted);font-size:11px;display:grid;gap:9px}.db-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:7px}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.page-heading h2{font-size:22px;letter-spacing:-.4px;margin:0}.page-heading p{color:var(--muted);font-size:12px;margin:3px 0 0}
+.desktop-tools{position:relative}.desktop-tools>summary{cursor:pointer;color:var(--fg);background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 12px}.desktop-tools[open] .desktop-tools-content{display:flex}
+.desktop-tools-content{position:absolute;top:38px;right:0;z-index:50;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;width:min(560px,calc(100vw - 280px));max-height:70vh;overflow:auto;box-shadow:0 18px 54px rgba(0,0,0,.35);display:none;flex-wrap:wrap;align-items:center;gap:9px}
+.desktop-tools-content .count{width:100%}.desktop-tools-content input[type=file]{max-width:95%}
+#refresh-progress{order:20;flex-basis:100%}#refresh-results{order:21;flex-basis:100%;margin:0!important;max-height:50vh;overflow:auto}
+#view-discover .discover-intro,#view-sources .sources-intro{margin-bottom:14px;color:var(--muted)}
+#view-discover #candidate-panel{display:block!important;background:var(--panel);border:1px solid var(--border)!important;border-radius:12px;padding:18px!important;margin:0!important}
+#view-discover #candidate-panel-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}
+#view-sources #swiss-sources-panel{display:block!important;width:100%;border:1px solid var(--border);border-radius:12px;margin:0;padding:18px;background:var(--panel)}
+#view-calendar .dash-row-cal{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}#view-calendar .cal-grid{min-height:360px}
+#view-settings .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:14px}.settings-grid .card p{color:var(--muted);font-size:12px}.settings-grid .card label{display:flex;align-items:center;gap:9px;margin:12px 0}
+#view-settings .settings-grid .card select{max-width:100%}
+#view-tracker #tracker-wrap,#view-review #table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--border);background:var(--panel)}
+#view-review #table-wrap table,#view-tracker #tracker-wrap table{min-width:850px}
+@media(max-width:1150px){.desktop-sidebar{width:190px}header.top,main{margin-left:190px}main{padding:18px 18px 56px}header.top{padding:12px 18px}.side-link{padding:9px}}
+@media(max-width:780px){.desktop-sidebar{width:58px;padding:12px 5px}.sidebar-brand{font-size:0;padding:8px 10px 18px}.sidebar-brand .sidebar-mark{font-size:14px}.side-link{justify-content:center;font-size:0;padding:8px 0}.side-icon{font-size:17px}.sidebar-foot{font-size:0}header.top,main{margin-left:58px}header.top{padding:10px}.page-heading{align-items:start}.page-heading h2{font-size:19px}}
+
+/* Second desktop design pass: genuine two-column Discover review surface. */
+#view-discover .discover-workspace{display:grid;grid-template-columns:minmax(300px, .94fr) minmax(350px,1.06fr);gap:14px;align-items:start;margin-top:14px}
+#view-discover .discover-list{min-width:0}
+#view-discover #candidate-panel{margin-top:0!important;border:0!important;padding-top:0!important}
+#view-discover #candidate-panel-items{display:flex!important;flex-direction:column;gap:8px;max-height:min(67vh,780px);overflow:auto;padding-right:4px}
+#view-discover .candidate-record{display:block!important;padding:13px 14px!important;cursor:pointer;background:var(--panel);border-radius:10px!important;transition:background .12s,border-color .12s}
+#view-discover .candidate-record:hover{background:var(--panel2)}
+#view-discover .candidate-record.selected{border-color:var(--accent)!important;box-shadow:inset 3px 0 var(--accent)}
+#view-discover .candidate-record:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#view-discover .candidate-record >button{margin-top:8px}
+#view-discover .discover-detail{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;position:sticky;top:80px;max-height:calc(100vh - 120px);overflow:auto;min-height:380px}
+#view-discover .discover-detail h3{font-size:19px;line-height:1.3;margin:8px 0 10px}
+#view-discover .discover-detail h4{margin:24px 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+#view-discover .detail-eyebrow{color:var(--accent);font-weight:650;font-size:12px}
+#view-discover .detail-flags{padding-left:18px;line-height:1.65;overflow-wrap:anywhere}
+#view-discover .discover-detail>button{margin:10px 8px 0 0}
+#view-tracker .page-heading{margin-bottom:14px}
+#view-tracker #tracker-wrap{max-height:calc(100vh - 305px);overflow:auto}
+#view-tracker #tracker-wrap th{background:var(--panel2);top:0}
+#view-tracker #tracker-wrap tr:hover td{background:var(--panel2)}
+#view-tracker #tracker-wrap .status-select{min-width:122px}
+#view-tracker #tracker-wrap input[type=date]{min-width:138px}
+#view-tracker #tracker-wrap .note{min-height:35px}
+@media(max-width:1150px){#view-discover .discover-workspace{grid-template-columns:1fr}#view-discover .discover-detail{position:static;max-height:none}#view-discover #candidate-panel-items{max-height:530px}}
+@media(prefers-reduced-motion:reduce){#view-discover .candidate-record{transition:none}}
+
+/* UI Pass 3: unified dashboard, calendar, sources and settings without changing data handlers */
+.page-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#view-dashboard .page-heading{margin-bottom:16px}
+#view-dashboard .dash{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#view-dashboard .stat{position:relative;overflow:hidden;padding:19px 20px;min-height:112px}
+#view-dashboard .stat h3{font-size:11px;text-transform:none;letter-spacing:.01em}
+#view-dashboard .stat .num{font-size:29px;letter-spacing:-.8px}
+#view-dashboard .stat .sub{line-height:1.5;margin-top:8px}
+#view-dashboard .grid2{grid-template-columns:minmax(260px,1fr) minmax(360px,1.5fr)}
+#view-dashboard .card,#view-calendar .card,#view-sources #swiss-sources-panel,#view-settings .card{box-shadow:0 3px 18px rgba(0,0,0,.04)}
+#view-dashboard .follow-list{line-height:1.7}
+.calendar-guide,.sources-guide{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:var(--muted);font-size:12px}
+.calendar-guide{display:flex;gap:10px;align-items:center}
+.calendar-guide-dot{background:var(--accent);width:8px;height:8px;flex:none;border-radius:100%}
+#view-calendar #calendar-host .dash-row-cal{grid-template-columns:minmax(0, 1.65fr) minmax(290px,.85fr);align-items:start}
+#view-calendar #calendar-host .card{padding:18px;min-width:0}
+#view-calendar .cal-cell{min-height:74px}
+#view-calendar .cal-head{gap:10px;margin-bottom:16px}
+#view-calendar .cal-grid{min-height:435px}
+#view-calendar .cal-dow{padding-bottom:8px}
+#view-calendar .cal-legend{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px 13px}
+#view-calendar #pie-wrap{justify-content:center}
+.sources-guide{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.sources-guide strong{color:var(--fg);font-size:13px}
+.sources-guide p{margin:5px 0 0;line-height:1.55;max-width:830px}
+.sources-guide-badge{border:1px solid var(--border);border-radius:999px;white-space:nowrap;padding:5px 10px;color:var(--fg)}
+#view-sources #swiss-sources-panel{padding:20px!important}
+#view-sources #swiss-sources-panel table{font-size:12px}
+#view-sources #swiss-sources-panel th{background:var(--panel2);padding:11px 9px}
+#view-sources #swiss-sources-panel td{padding:10px 9px}
+#view-sources #swiss-sources-panel tr:hover td{background:var(--panel2)}
+#view-sources #swiss-sources-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:15px 0}
+#view-sources #swiss-sources-list>div{background:var(--panel2);border-radius:10px!important;padding:13px!important}
+#view-settings .settings-layout{display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;align-items:start}
+#view-settings .settings-jump{position:sticky;top:78px;display:flex;flex-direction:column;gap:5px;padding:9px;background:var(--panel);border:1px solid var(--border);border-radius:12px}
+#view-settings .settings-jump a{display:block;padding:10px 12px;border-radius:7px;color:var(--muted);font-weight:550}
+#view-settings .settings-jump a:hover{background:var(--panel2);color:var(--fg);text-decoration:none}
+#view-settings .settings-grid{display:grid;grid-template-columns:1fr;gap:12px}
+#view-settings .setting-card{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:21px;scroll-margin-top:90px}
+#view-settings .setting-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--border);background:var(--panel2);border-radius:9px;color:var(--accent);font-size:18px}
+#view-settings .setting-card h3{text-transform:none;letter-spacing:0;color:var(--fg);font-size:14px;margin-bottom:7px}
+#view-settings .setting-card p{line-height:1.65;max-width:760px;margin:0 0 12px}
+#view-settings .setting-card label{justify-content:space-between;max-width:500px}
+#view-settings .setting-card select{min-width:170px}
+@media(max-width:1100px){#view-calendar #calendar-host .dash-row-cal{grid-template-columns:1fr}#view-dashboard .grid2{grid-template-columns:1fr}#view-settings .settings-layout{grid-template-columns:1fr}#view-settings .settings-jump{position:static;flex-direction:row;flex-wrap:wrap}}
+@media(max-width:800px){#view-dashboard .dash{grid-template-columns:repeat(2,minmax(0,1fr))}.sources-guide{align-items:flex-start;flex-direction:column}.page-toolbar{width:100%}}
+@media(prefers-reduced-motion:reduce){#view-settings .settings-jump a{scroll-behavior:auto}}
+</style>
+<link rel="stylesheet" href="search-step1.css">
+<link rel="stylesheet" href="review-step2.css">
+<link rel="stylesheet" href="applications-step3.css">
+<link rel="stylesheet" href="followups-step4.css">
+<link rel="stylesheet" href="dashboard-step5.css">
+<link rel="stylesheet" href="sources-step6.css">
+<link rel="stylesheet" href="settings-step7.css">
+<link rel="stylesheet" href="reset-step8.css">
+<link rel="stylesheet" href="search-ux-polish.css">
+</head>
+<body>
+<aside class="desktop-sidebar" aria-label="Navigation principale">
+  <div class="sidebar-brand"><span class="sidebar-mark">M</span> Masar (مسار)</div>
+  <nav class="sidebar-nav">
+    <button type="button" class="side-link active" data-page="dashboard"><span class="side-icon">▦</span>Dashboard</button>
+    <button type="button" class="side-link" data-page="discover"><span class="side-icon">⌕</span>Découvrir</button>
+    <button type="button" class="side-link" data-page="tracker"><span class="side-icon">▤</span>Candidatures</button>
+    <button type="button" class="side-link" data-page="calendar"><span class="side-icon">▦</span>Calendrier</button>
+    <button type="button" class="side-link" data-page="sources"><span class="side-icon">◉</span>Sources</button>
+    <button type="button" class="side-link" data-page="settings"><span class="side-icon">⚙</span>Paramètres</button>
+  </nav>
+  <div class="sidebar-foot"><div><span class="db-dot"></span>SQLite local</div><button type="button" id="sidebar-theme" class="ghost">◐ Changer de thème</button><div>Masar · développement</div></div>
+</aside>
+
+
+<header class="top">
+  <h1 id="desktop-page-title">Dashboard</h1>
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="review">Review</button>
+    <button class="tab" data-tab="tracker">Applications</button>
+  </nav>
+  <span class="spacer"></span>
+  <button class="primary" id="btn-refresh-native" type="button">⌕ Recherche</button>
+  <button id="btn-refresh-cancel" type="button" hidden>Cancel refresh</button>
+  <div id="refresh-progress" role="status" aria-live="polite" hidden style="width:100%;max-width:460px;padding:8px 0">
+    <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px">
+      <span id="refresh-phase">Preparing refresh</span>
+      <span id="refresh-fraction" style="font-variant-numeric:tabular-nums"></span>
+    </div>
+    <progress id="refresh-meter" max="1" style="width:100%;height:10px"></progress>
+    <div id="refresh-detail" class="hint">Waiting for Jobup</div>
+  </div>
+  <section id="refresh-results" hidden aria-label="Last refresh results" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--panel);margin:4px 0">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+      <strong id="refresh-results-heading">Last refresh</strong>
+      <button type="button" id="refresh-results-close">Close</button>
+    </div>
+    <p class="hint" id="refresh-results-summary" style="margin:8px 0"></p>
+    <p class="hint" id="refresh-results-queue" style="margin:8px 0"></p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button type="button" id="refresh-view-candidates" class="primary">View eligible candidates</button>
+      <button type="button" id="refresh-view-unverified">Inspect unverified</button>
+      <button type="button" id="refresh-view-sources">Source diagnostics</button>
+    </div>
+    <div id="candidate-panel" hidden style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <strong>Candidates awaiting approval</strong>
+        <button type="button" id="candidate-panel-close">Close candidates</button>
+      </div>
+      <p class="hint">Each candidate must be checked against its original advertisement before adding it to Review. Eligibility is a screening result, not a guarantee.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0">
+        <label for="candidate-source-filter" class="hint">Source</label>
+        <select id="candidate-source-filter" style="width:auto"><option value="all">All sources</option><option value="jobup">Jobup</option><option value="jobs_ch">Jobs.ch</option><option value="okjob">OK Job</option><option value="emploi_en_suisse">Emploi en Suisse</option><option value="100000jobs">100000jobs</option></select>
+        <label for="candidate-age-filter" class="hint">Last seen</label>
+        <select id="candidate-age-filter" style="width:auto"><option value="all">Any date</option><option value="2">2 days</option><option value="7">7 days</option></select>
+        <label class="hint"><input type="checkbox" id="candidate-hide-outside"> Hide outside target roles</label>
+      </div>
+      <div id="candidate-panel-items" style="display:grid;gap:8px"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="candidate-include-unverified"> Include unverified with a full description (manual verification required)</label>
+        <button type="button" id="candidate-next-page">Load more</button>
+        <span id="candidate-panel-count" class="hint"></span>
+      </div>
+    </div>
+  </section>
+  <details class="desktop-tools" id="desktop-tools"><summary>Outils et importations</summary><div class="desktop-tools-content">
+  <label for="refresh-window" title="Jobup search lookback window" style="font-size:12px">Jobup period</label>
+  <select id="refresh-window" title="Refresh Jobup ads posted in the last 1, 3 or 7 days" style="width:auto"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select>
+  <button id="btn-swiss-sources" type="button">Swiss sources (8)</button>
+  <section id="swiss-sources-panel" hidden style="width:100%;border:1px solid var(--border);border-radius:10px;padding:14px;background:var(--panel);">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><strong>Swiss employment sources · VS / VD</strong><button id="btn-swiss-close" type="button">Close</button></div>
+    <p style="font-size:12px;opacity:.8;margin:8px 0">Utilisez Recherche pour lancer la collecte sélectionnée. Les sites officiels sans collecteur restent accessibles pour un import manuel.</p>
+    <div id="swiss-sources-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:9px"></div>
+    <section id="source-diagnostics" aria-label="Collection diagnostics" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong>Collector diagnostics — last attempt</strong><button id="source-diagnostics-clear" type="button">Clear diagnostics</button></div>
+      <p class="hint">A source is marked Successful only after its native collector actually returns. Not connected means this version has no native collector; it does not mean zero vacancies exist.</p>
+      <div id="source-diagnostics-rows" role="status" aria-live="polite"></div>
+    </section>
+
+    <section style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:grid;gap:9px" aria-label="Swiss vacancy import">
+      <strong>Import vacancies from a Swiss job website</strong>
+      <p class="hint">Paste JSON exported from a website, a CSV file's contents, or a single vacancy URL. Nothing is fetched automatically. Imported records remain Unverified until reviewed.</p>
+      <label for="swiss-source">Source</label>
+      <select id="swiss-source" style="max-width:320px"><option value="jobs_ch">Jobs.ch</option><option value="jobup">Jobup</option><option value="indeed_ch">Indeed Suisse</option><option value="emploi_en_suisse">Emploi en Suisse</option><option value="jobscout24">JobScout24</option><option value="okjob">OK Job</option><option value="100000jobs">100000jobs</option><option value="job_room">Job-Room</option></select>
+      <textarea id="swiss-import-input" rows="5" placeholder='JSON example: [{"title":"Vendeur 80%","company":"Exemple SA","place":"Lausanne","url":"https://www.jobs.ch/..."}]' style="width:100%;box-sizing:border-box;min-height:112px;max-height:360px;overflow-y:auto;resize:vertical" maxlength="500000"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input type="file" id="swiss-import-file" accept=".json,.csv,.tsv,.txt" style="max-width:320px"><button id="swiss-preview-import" type="button">Preview import</button><button id="swiss-save-import" type="button" disabled>Save to staging</button></div>
+      <div id="swiss-import-report" class="hint" role="status" aria-live="polite">No imported records selected.</div>
+      <div id="swiss-import-preview" style="max-height:220px;overflow:auto"></div>
+    </section>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="btn-swiss-import" type="button">Import compatible JSON</button><span style="font-size:12px;opacity:.8">Opening a site does not import advertisements automatically.</span></div>
+  </section>
+  <button class="primary" id="btn-load">📂 Load jobs files</button>
+  <input type="file" id="file-input" accept=".json" multiple hidden>
+  <button id="btn-load-folder">📁 Load folder</button>
+  <input type="file" id="folder-input" accept=".json" multiple webkitdirectory hidden>
+  <button id="btn-import">Import reviewed.json</button>
+  <input type="file" id="rev-input" accept=".json" hidden>
+  <button id="btn-export">Export reviewed.json</button>
+  <button id="btn-migrate">Import legacy data</button>
+  <button id="btn-undo" class="ghost" title="Restore the state before the last import">↶ Undo</button>
+  <span class="count" id="count">0 jobs loaded</span>
+  </div></details>
+</header>
+
+<main>
+  <section class="view active" id="view-dashboard">
+    <div class="page-heading"><div><h2>Vue d’ensemble</h2><p>Votre activité de recherche d’emploi, suivis et candidatures enregistrées localement.</p></div><div class="page-toolbar"><button class="primary" id="dash-go-discover" type="button">Découvrir des offres</button><button id="dash-go-sources" type="button">État des sources</button></div></div><div id="getting-started"></div>
+
+    <div class="dash">
+      <div class="card stat trend"><h3>Candidatures suivies</h3><div class="num" id="st-total">0</div><div class="sub" id="st-total-sub">—</div></div>
+      <div class="card stat"><h3>Cette semaine</h3><div class="num" id="st-week">0</div><div class="sub" id="st-week-sub">—</div></div>
+      <div class="card stat ok"><h3>Taux de réponse</h3><div class="num" id="st-rate">0%</div><div class="sub" id="st-rate-sub">—</div></div>
+      <div class="card stat warn"><h3>Entretiens et offres</h3><div class="num" id="st-iv">0</div><div class="sub" id="st-iv-sub">—</div></div>
+    </div>
+
+    <div class="dash-row-cal">
+      <div class="card">
+        <div class="cal-head">
+          <button id="cal-prev">‹</button>
+          <div class="title" id="cal-title">—</div>
+          <button id="cal-next">›</button>
+          <button id="cal-today" class="ghost">today</button>
+          <span class="spacer" style="flex:1"></span>
+          <select id="cal-metric">
+            <option value="any">all activity</option>
+            <option value="applied">applications only</option>
+            <option value="skipped">skipped only</option>
+            <option value="new">to apply only</option>
+          </select>
+        </div>
+        <div class="cal-dow"><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div></div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-legend">
+          <span class="lg"><i style="background:#4ade80"></i>applied</span>
+          <span class="lg"><i style="background:#38bdf8"></i>screening</span>
+          <span class="lg"><i style="background:#fbbf24"></i>interview</span>
+          <span class="lg"><i style="background:#22c55e"></i>offer</span>
+          <span class="lg"><i style="background:#22d3ee"></i>to apply</span>
+          <span class="lg"><i style="background:#ef4444"></i>rejected</span>
+          <span class="lg"><i style="background:#eab308"></i>skipped</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pie-head">
+          <h3>Status breakdown</h3>
+          <div class="period-tabs" id="pie-tabs">
+            <button data-p="day">Day</button>
+            <button data-p="month" class="active">Month</button>
+            <button data-p="year">Year</button>
+          </div>
+        </div>
+        <div class="pie-period" id="pie-period">—</div>
+        <div class="pie-wrap" id="pie-wrap"></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card" style="grid-column:1">
+        <h3>Applications per week <span class="hint" style="text-transform:none;font-weight:400">(last 8 weeks)</span></h3>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="card">
+        <h3>Upcoming follow-ups</h3>
+        <div class="follow-list" id="follow-list"><div class="hint">Nothing scheduled.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Recent activity</h3>
+      <div class="follow-list" id="recent-list"><div class="hint">No activity yet.</div></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-review">
+    <div class="filters">
+      <label>Status:
+        <select id="f-status">
+          <option value="">all</option>
+          <option value="new">new (unreviewed)</option>
+          <option value="skipped">skipped</option>
+          <optgroup label="pipeline">
+            <option value="applied">applied</option>
+            <option value="screening">screening</option>
+            <option value="interview">interview</option>
+            <option value="offer">offer</option>
+            <option value="rejected">rejected</option>
+            <option value="withdrawn">withdrawn</option>
+          </optgroup>
+        </select>
+      </label>
+      <label>From: <input type="date" id="f-date-from"></label>
+      <label>To: <input type="date" id="f-date-to"></label>
+      <input type="text" id="f-search" placeholder="search title / company / place">
+      <button id="btn-clear">clear filters</button>
+      <button id="btn-candidates" type="button">Eligible candidates</button>
+      <button id="btn-audit" type="button">Eligibility audit</button>
+    </div>
+    <section id="eligibility-audit" class="card" hidden style="margin-bottom:14px">
+      <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <strong>Staged advertisement audit</strong>
+        <select id="audit-class"><option value="unverified">Unverified</option><option value="excluded">Excluded</option><option value="eligible">Eligible</option></select>
+        <button id="audit-load" type="button">Load audit</button>
+        <button id="audit-close" type="button">Close</button>
+        <span id="audit-count" class="hint"></span>
+      </div>
+      <div id="audit-results" style="overflow:auto;max-height:390px"></div>
+      <button id="audit-more" type="button" hidden>Show next 50</button>
+    </section>
+    <div id="table-wrap"><div class="empty">No jobs loaded yet.</div></div>
+  </section>
+
+  <section class="view" id="view-tracker">
+    <div class="page-heading"><div><h2>Mes candidatures</h2><p>Suivi des statuts, entretiens, notes et prochaines relances.</p></div><button id="tracker-open-review" type="button">Consulter Review</button></div>
+    <div class="filters">
+      <label>Status:
+        <select id="t-status">
+          <option value="">all in pipeline</option>
+          <option value="applied">applied</option>
+          <option value="screening">screening</option>
+          <option value="interview">interview</option>
+          <option value="offer">offer</option>
+          <option value="rejected">rejected</option>
+          <option value="withdrawn">withdrawn</option>
+        </select>
+      </label>
+      <input type="text" id="t-search" placeholder="search title / company">
+      <span class="spacer" style="flex:1"></span>
+      <span class="hint" id="t-count">0 applications</span>
+    </div>
+    <div id="tracker-wrap"><div class="empty">No applications yet.</div></div>
+  </section>
+
+  <section class="view" id="view-discover"><div class="page-heading"><div><h2>Découvrir des offres</h2><p>Vérifiez les exigences avant d’ajouter une candidature.</p></div><button id="discover-reload" class="primary" type="button">Actualiser les candidats</button></div><p class="discover-intro">Les résultats sont conservés localement. Les offres non vérifiées exigent une vérification manuelle.</p><div class="discover-workspace"><div class="discover-list"><div id="discover-candidate-host"></div></div><aside id="discover-detail" class="discover-detail" aria-live="polite"><div class="detail-placeholder"><strong>Sélectionnez une offre</strong><p>Consultez les critères, les raisons du classement et le lien vers l’annonce originale avant validation.</p></div></aside></div><div class="card" style="margin-top:14px"><h3>Vérification et dossiers importés</h3><p class="hint">Consultez les annonces ajoutées à la liste Review, les exclusions et les résultats de l’audit.</p><button type="button" id="discover-open-review">Ouvrir la liste Review</button></div></section>
+  <section class="view" id="view-calendar"><div class="page-heading"><div><h2>Calendrier</h2><p>Dates d’activité et relances enregistrées localement, sans synchronisation extérieure.</p></div><button type="button" id="calendar-go-apps">Voir mes candidatures</button></div><div class="calendar-guide"><span class="calendar-guide-dot"></span><span>Sélectionnez un jour pour consulter les candidatures associées. Les dates affichées proviennent des données existantes.</span></div><div id="calendar-host"></div></section>
+  <section class="view" id="view-sources"><div class="page-heading"><div><h2>Sources d’offres</h2><p>État réel des huit sites, dernière collecte et diagnostics détaillés.</p></div><div class="page-toolbar"><button type="button" id="sources-open-tools" class="primary">Outils de collecte</button></div></div><div class="sources-guide"><div><strong>Collecteurs et disponibilité</strong><p>Jobup, Jobs.ch et OK Job disposent de collecteurs. Les échecs HTTP 403 et les sites non intégrés restent signalés, sans prétendre avoir récupéré leurs offres.</p></div><span class="sources-guide-badge">8 sources suivies</span></div><div id="sources-host"></div></section>
+  <section class="view" id="view-settings"><div class="page-heading"><div><h2>Paramètres</h2><p>Préférences d’affichage, collecte manuelle et conservation des données.</p></div></div><div class="settings-layout"><nav class="settings-jump" aria-label="Sections des paramètres"><a href="#setting-appearance">Apparence</a><a href="#setting-search">Recherche</a><a href="#setting-data">Données</a><a href="#setting-about">À propos</a></nav><div class="settings-grid"><div class="card setting-card" id="setting-appearance"><div class="setting-icon">◐</div><div><h3>Apparence</h3><p>Choisissez le thème de cette interface. Votre sélection est conservée sur cet appareil.</p><label for="settings-theme">Thème de l’interface <select id="settings-theme"><option value="dark">Sombre</option><option value="light">Clair</option></select></label></div></div><div class="card setting-card" id="setting-search"><div class="setting-icon">⌕</div><div><h3>Recherche</h3><p>La collecte utilise les paramètres de la page Recherche. Les règles personnelles sont facultatives dans Recherche.</p><button type="button" id="settings-window">Ouvrir les paramètres de collecte</button></div></div><div class="card setting-card" id="setting-data"><div class="setting-icon">▤</div><div><h3>Données locales</h3><p>Les candidatures, notes et suivis sont enregistrés dans SQLite. Les outils existants permettent l’importation et l’exportation.</p><button type="button" id="settings-tools">Outils de sauvegarde et importation</button></div></div><div class="card setting-card" id="setting-about"><div class="setting-icon">ⓘ</div><div><h3>À propos</h3><p>Masar (مسار) · Tauri v2, Rust et SQLite. Les actualisations sont lancées manuellement : aucune collecte automatique en arrière-plan n’est ajoutée.</p><button type="button" id="settings-go-sources">Consulter les huit sources</button></div></div></div></div></section>
+</main>
+
+<div class="drawer" id="day-drawer">
+  <header>
+    <h2 id="day-title">—</h2>
+    <button id="day-close" class="ghost">✕</button>
+  </header>
+  <div class="body">
+    <div class="filters">
+      <label>Status:
+        <select id="day-status">
+          <option value="">all</option>
+          <option value="new">to apply</option>
+          <option value="skipped">skipped</option>
+          <option value="applied">applied</option>
+          <option value="screening">screening</option>
+          <option value="interview">interview</option>
+          <option value="offer">offer</option>
+          <option value="rejected">rejected</option>
+          <option value="withdrawn">withdrawn</option>
+        </select>
+      </label>
+      <span class="hint" id="day-count"></span>
+    </div>
+    <div id="day-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   CONSTANTS
+   ===================================================================== */
+const STATUS_DEFS = {
+  new:       { label: 'To apply',   color: '#22d3ee', group: 'review'   },
+  skipped:   { label: 'Skipped',    color: '#eab308', group: 'review'   },
+  applied:   { label: 'Applied',    color: '#4ade80', group: 'pipeline' },
+  screening: { label: 'Screening',  color: '#38bdf8', group: 'pipeline' },
+  interview: { label: 'Interview',  color: '#fbbf24', group: 'pipeline' },
+  offer:     { label: 'Offer',      color: '#22c55e', group: 'pipeline' },
+  rejected:  { label: 'Rejected',   color: '#ef4444', group: 'closed'   },
+  withdrawn: { label: 'Withdrawn',  color: '#6b7280', group: 'closed'   },
+};
+const PIPELINE_STATUSES  = ['applied','screening','interview','offer','rejected','withdrawn'];
+const RESPONDED_STATUSES = ['screening','interview','offer','rejected'];
+const ACTIVE_STATUSES    = ['applied','screening','interview','offer'];
+
+const STORAGE_KEY = 'jobup_reviewed_v1';
+const SNAPSHOT_KEY = 'jobup_import_snapshot_v1';
+const SETTINGS_KEY = 'jobup_settings_v1';
+const JOBS_CACHE_KEY = 'jobup_jobs_cache_v1';
+
+const DAY_THEME = {
+  applied:{color:'#4ade80',label:'Applied'},
+  screening:{color:'#38bdf8',label:'Screening'},
+  interview:{color:'#fbbf24',label:'Interview'},
+  offer:{color:'#22c55e',label:'Offer'},
+  new:{color:'#22d3ee',label:'To apply'},
+  rejected:{color:'#ef4444',label:'Rejected'},
+  withdrawn:{color:'#6b7280',label:'Withdrawn'},
+  skipped:{color:'#eab308',label:'Skipped'},
+};
+const CHIP_ORDER = ['applied','screening','interview','offer','new','rejected','withdrawn','skipped'];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+let allJobs = [];
+let reviewed = {};
+let settings = { dailyGoal: 3 };
+let calState = { year: new Date().getFullYear(), month: new Date().getMonth(), metric: 'any' };
+let pieState = { period: 'month', day: null };
+let currentTab = 'dashboard';
+let drawerDate = null;
+let cacheInfo = { savedAt: '', count: 0 };
+
+/* =====================================================================
+   UTILITIES
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const todayStr = () => new Date().toISOString().slice(0,10);
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => (
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+));
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+function isoWeekStart(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
+function fmtDate(d){if(!d)return '';const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;}
+function hexToRgba(hex,a){const h=hex.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;}
+function toast(msg,cls=''){const el=$('#toast');el.textContent=msg;el.className='toast show '+cls;clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast '+cls,2200);}
+async function openExternalUrl(url){
+  const s=String(url||'');
+  if(!/^https:\/\//i.test(s)){toast('Invalid URL','err');return;}
+  try {await window.__TAURI__.core.invoke('open_external_url',{url:s});}
+  catch(err){toast('Failed to open: '+String(err).slice(0,140),'err');}
+}
+function wireExternalLinks(selector){
+  $$(selector).forEach(a=>a.addEventListener('click',ev=>{
+    ev.preventDefault();openExternalUrl(a.getAttribute('data-external'));
+  }));
+}
+
+
+/* =====================================================================
+   MIGRATION
+   ===================================================================== */
+function migrateEntry(e){
+  if(!e||typeof e!=='object')return e;
+  if(!e.status)e.status='new';
+  if(e.status==='applied'&&!e.appliedDate)e.appliedDate=e.date||'';
+  if(!Array.isArray(e.history))e.history=[];
+  return e;
+}
+function migrateReviewed(data){
+  if(!data||typeof data!=='object')return {};
+  if(Array.isArray(data.done)){
+    const o={};for(const id of data.done)o[id]={status:'applied',note:'',date:'',appliedDate:todayStr(),history:[]};
+    return o;
+  }
+  if(data.version&&data.reviewed)return migrateReviewed(data.reviewed);
+  for(const id of Object.keys(data))migrateEntry(data[id]);
+  return data;
+}
+
+/* =====================================================================
+   PERSISTENCE
+   ===================================================================== */
+function loadState(){
+  try{const r=localStorage.getItem(STORAGE_KEY);reviewed=r?migrateReviewed(JSON.parse(r)):{};}catch(e){reviewed={};}
+  try{const s=localStorage.getItem(SETTINGS_KEY);if(s)settings={...settings,...JSON.parse(s)};}catch{}
+  try{
+    const raw=localStorage.getItem(JOBS_CACHE_KEY);
+    if(raw){
+      const c=JSON.parse(raw);
+      if(Array.isArray(c.jobs)&&c.jobs.length){
+        allJobs=c.jobs;
+        cacheInfo.savedAt=c.savedAt||'';
+        cacheInfo.count=c.jobs.length;
+      }
+    }
+  }catch(e){console.warn('cache restore failed',e);}
+}
+let nativeReady=false;
+let persistQueue=Promise.resolve();
+let committedReviews={};
+const invokeNative=(name,args)=>window.__TAURI__.core.invoke(name,args);
+function enqueueNative(job){
+  persistQueue=persistQueue.then(job).catch(error=>{
+    console.error('SQLite persistence error:',error);
+    toast('SQLite save failed — previous browser data retained','err');
+    nativeReady=false; // Avoid pretending future changes are persisted.
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(reviewed)); // Recovery only after a failed native write.
+  });
+  return persistQueue;
+}
+function save(){
+  // Maintain a recovery copy for Phase 2; SQLite is the authoritative store once ready.
+  if(!nativeReady){localStorage.setItem(STORAGE_KEY,JSON.stringify(reviewed));return;}
+  const next=JSON.parse(JSON.stringify(reviewed));
+  const changes=[];
+  for(const id of new Set([...Object.keys(committedReviews),...Object.keys(next)])){
+    if(JSON.stringify(committedReviews[id])!==JSON.stringify(next[id]))
+      changes.push([id,next[id]??null]);
+  }
+  committedReviews=next;
+  if(changes.length)enqueueNative(async()=>{
+    for(const [id,entry] of changes)await invokeNative('db_put_review',{id,entry});
+  });
+}
+async function startNativePersistence(){
+  try{
+    // LocalStorage is only read as a migration source. Existing SQLite data wins.
+    const original=JSON.parse(JSON.stringify(reviewed));
+    const oldJobs=JSON.parse(JSON.stringify(allJobs));
+    let persisted=await invokeNative('db_load');
+    if(Object.keys(original).length){
+      const report=await invokeNative('db_import_reviewed',{reviewed:original,source:'webview-localStorage-v1'});
+      if(report.conflicts)toast(`${report.conflicts} localStorage conflicts preserved for audit`,'err');
+    }
+    if(oldJobs.length)await invokeNative('db_add_jobs',{jobs:oldJobs,source:'webview-localStorage-v1'});
+    persisted=await invokeNative('db_load');
+    reviewed=migrateReviewed(persisted.reviewed);
+    if(persisted.jobs.length)allJobs=persisted.jobs;
+    settings={...settings,...persisted.settings};
+    cacheInfo.savedAt=persisted.savedAt||'';
+    cacheInfo.count=allJobs.length;
+    committedReviews=JSON.parse(JSON.stringify(reviewed));
+    nativeReady=true;
+    localStorage.removeItem(STORAGE_KEY); // Migrated successfully: SQLite now owns the state.
+    localStorage.removeItem(JOBS_CACHE_KEY);
+    renderAll();
+    toast('SQLite storage ready','ok');
+  }catch(error){
+    console.error('SQLite startup failed:',error);
+    toast(`SQLite unavailable: ${error}`,'err');
+    // Do not proceed with an unsafe fallback that claims durable SQLite storage.
+  }
+}
+
+/* =====================================================================
+   ACCESSORS
+   ===================================================================== */
+function statusOf(id){const r=reviewed[id];return r?r.status:'new';}
+function noteOf(id){const r=reviewed[id];return r?(r.note||''):'';}
+function metaOf(id){
+  const r=reviewed[id];
+  if(r&&r._meta)return r._meta;
+  const j=allJobs.find(x=>x.id===id);
+  if(j)return {title:j.title,company:j.company,place:j.place,link:j.link};
+  return {title:id.slice(0,8)+'…',company:'?',place:'',link:''};
+}
+function actionDate(id){
+  const r=reviewed[id];
+  if(!r)return null;
+  if(r.date)return r.date;
+  if(r.appliedDate)return r.appliedDate;
+  const j=allJobs.find(x=>x.id===id);
+  if(j&&j._date)return j._date;
+  return null;
+}
+
+/* =====================================================================
+   MUTATION
+   ===================================================================== */
+function setStatus(id,newStatus){
+  const r=reviewed[id]||{note:'',date:'',history:[]};
+  const prev=r.status||'new';
+  if(prev===newStatus)return;
+  r.status=newStatus;
+  const now=todayStr();
+  if(!r.date)r.date=now;
+  if(newStatus==='applied'&&!r.appliedDate)r.appliedDate=now;
+  if(!r._meta){const j=allJobs.find(x=>x.id===id);if(j)r._meta={title:j.title,company:j.company,place:j.place,link:j.link};}
+  if(!Array.isArray(r.history))r.history=[];
+  r.history.push({from:prev,to:newStatus,date:now,ts:Date.now()});
+  reviewed[id]=r;
+  save();
+}
+function setNote(id,note){
+  const r=reviewed[id]||{status:'new',date:'',history:[]};
+  r.note=note;
+  if(!r.date)r.date=todayStr();
+  if(!r._meta){const j=allJobs.find(x=>x.id===id);if(j)r._meta={title:j.title,company:j.company,place:j.place,link:j.link};}
+  reviewed[id]=r;
+  save();
+}
+function setFollowUp(id,v){const r=reviewed[id];if(!r)return;r.followUpDate=v||'';save();}
+function clearStatus(id){delete reviewed[id];save();}
+
+function backfillMeta(){
+  let changed=false;
+  for(const j of allJobs){
+    const r=reviewed[j.id];
+    if(!r)continue;
+    if(!r._meta){
+      r._meta={title:j.title,company:j.company,place:j.place,link:j.link};
+      changed=true;
+    }
+    if(!r.date&&j._date){r.date=j._date;changed=true;}
+  }
+  if(changed)save();
+}
+
+/* =====================================================================
+   FILE LOADING + CACHE
+   ===================================================================== */
+async function loadFiles(fileList){
+  const loaded=[];
+  for(const f of fileList){
+    try{
+      const text=await f.text();
+      const data=JSON.parse(text);
+      const arr=Array.isArray(data)?data:(data.jobs||[]);
+      const nameMatch=(f.name||f.webkitRelativePath||'').match(/(\d{4}-\d{2}-\d{2})/);
+      const date=nameMatch?nameMatch[1]:'';
+      for(const j of arr){j._date=date;loaded.push(j);}
+    }catch(e){toast('Failed to read '+(f.name||'?')+': '+e.message,'err');}
+  }
+  const seen=new Set();
+  allJobs=[];
+  for(const j of loaded){if(seen.has(j.id))continue;seen.add(j.id);allJobs.push(j);}
+  backfillMeta();
+  cacheJobs();
+  if(nativeReady){
+    const jobs=JSON.parse(JSON.stringify(allJobs));
+    enqueueNative(()=>invokeNative('db_add_jobs',{jobs,source:'manual-json-import'}));
+  }
+  renderAll();
+  toast(`Loaded ${allJobs.length} jobs`,'ok');
+}
+function cacheJobs(){
+  try{
+    const payload={savedAt:new Date().toISOString(),jobs:allJobs};
+    if(!nativeReady)localStorage.setItem(JOBS_CACHE_KEY,JSON.stringify(payload));
+    cacheInfo.savedAt=payload.savedAt;
+    cacheInfo.count=allJobs.length;
+    if(nativeReady)enqueueNative(()=>invokeNative('db_settings',{settings,savedAt:payload.savedAt}));
+  }catch(e){
+    console.warn('Could not cache jobs:',e);
+    toast('Loaded but not cached (localStorage full)','err');
+  }
+}
+
+/* =====================================================================
+   BACKUP / IMPORT / UNDO
+   ===================================================================== */
+async function exportBackup(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+  try{
+    await persistQueue;
+    const savedPath=await window.__TAURI__.core.invoke('export_reviewed',{
+      json:JSON.stringify(reviewed,null,2), timestamp:stamp
+    });
+    toast(`Export saved: ${savedPath}`,'ok');
+    console.info('Export saved:',savedPath);
+  }catch(err){
+    console.error('Export failed:',err);
+    toast(`Export failed: ${err}`,'err');
+  }
+}
+async function importBackup(file){
+  try{
+    const text=await file.text();
+    const data=JSON.parse(text);
+    await persistQueue;
+    if(nativeReady)await invokeNative('db_backup_auto');
+    localStorage.setItem(SNAPSHOT_KEY,JSON.stringify({
+      takenAt:new Date().toISOString(),
+      reviewed:JSON.parse(JSON.stringify(reviewed)),
+      settings:{...settings},
+    }));
+    reviewed=migrateReviewed(data);
+    if(data.settings)settings={...settings,...data.settings};
+    save();
+    backfillMeta();
+    renderAll();
+    toast('Imported · Undo available','ok');
+  }catch(e){toast('Import failed: '+e.message,'err');}
+}
+async function undoImport(){
+  const raw=localStorage.getItem(SNAPSHOT_KEY);
+  if(!raw){toast('Nothing to undo','err');return;}
+  try{
+    const snap=JSON.parse(raw);
+    await persistQueue;
+    if(nativeReady)await invokeNative('db_backup_auto');
+    reviewed=migrateReviewed(snap.reviewed||{});
+    if(snap.settings)settings={...settings,...snap.settings};
+    save();
+    localStorage.removeItem(SNAPSHOT_KEY);
+    renderAll();
+    toast('Import undone','ok');
+  }catch(e){toast('Undo failed: '+e.message,'err');}
+}
+
+/* =====================================================================
+   GETTING STARTED
+   ===================================================================== */
+function renderGettingStarted(){
+  const el=$('#getting-started');
+  if(allJobs.length){
+    const when = cacheInfo.savedAt
+      ? new Date(cacheInfo.savedAt).toLocaleString()
+      : 'this session';
+    el.innerHTML=`
+      <div class="getstarted" style="background:linear-gradient(135deg,rgba(74,222,128,.08),rgba(74,222,128,.02));border-color:rgba(74,222,128,.35)">
+        <h2>✅ ${allJobs.length} jobs loaded <span class="hint" style="font-weight:400">· cached ${when}</span></h2>
+        <div class="row" style="margin-top:6px">
+          <button onclick="document.getElementById('btn-load').click()">📂 Reload jobs files</button>
+          <span class="hint">Click after running <code>run.bat</code> to pull in new files. Otherwise your data is already here.</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  el.innerHTML=`
+    <div class="getstarted">
+      <h2>🚀 Getting started</h2>
+      <ol>
+        <li>Double-click <code>run.bat</code> — runs <code>fetch_jobs.py</code> and <code>prefilter.py</code>, saving new files into <code>data/YYYY/MM/</code>.</li>
+        <li>Come back here and click <b>📂 Load jobs files</b> — shift-click to select every <code>filtered_*.json</code> you want to review (Firefox doesn't allow folder picking, so multi-select works best).</li>
+        <li>Mark jobs <b>Apply</b> / <b>Skip</b>, add notes. Everything auto-saves in this browser.</li>
+        <li>Click <b>Export reviewed.json</b> and drop the file back into <code>data/</code> so <code>fetch_jobs.py</code> knows what's already done.</li>
+      </ol>
+      <div class="row">
+        <button class="primary" onclick="document.getElementById('btn-load').click()">📂 Load jobs files</button>
+        <button onclick="document.getElementById('btn-import').click()">Import reviewed.json</button>
+      </div>
+      <div class="hint" style="margin-top:8px">Tip: once loaded, jobs are cached in your browser — you only need to reload after running <code>run.bat</code> again.</div>
+    </div>
+  `;
+}
+
+/* =====================================================================
+   REVIEW TAB
+   ===================================================================== */
+function renderReview(){
+  const fStatus=$('#f-status').value;
+  const fFrom=$('#f-date-from').value;
+  const fTo=$('#f-date-to').value;
+  const fSearch=$('#f-search').value.toLowerCase().trim();
+
+  const filtered=allJobs.filter(j=>{
+    const st=statusOf(j.id);
+    if(fStatus&&st!==fStatus)return false;
+    if(fFrom&&j._date<fFrom)return false;
+    if(fTo&&j._date>fTo)return false;
+    if(fSearch){
+      const hay=(j.title+' '+j.company+' '+(j.place||'')).toLowerCase();
+      if(!hay.includes(fSearch))return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a,b)=>(b._date>a._date?1:(b._date<a._date?-1:0)));
+  $('#count').textContent=`${filtered.length} shown / ${allJobs.length} total`;
+
+  if(!filtered.length){$('#table-wrap').innerHTML='<div class="empty">No jobs match the filters.</div>';return;}
+
+  const rows=filtered.map(j=>{
+    const st=statusOf(j.id), note=noteOf(j.id);
+    const g=j.grades&&j.grades.length
+      ?(Math.min(...j.grades)===Math.max(...j.grades)
+        ?Math.min(...j.grades)+'%'
+        :Math.min(...j.grades)+'-'+Math.max(...j.grades)+'%')
+      :'?';
+    const stCls=ACTIVE_STATUSES.includes(st)?'applied':(st==='skipped'?'skipped':'');
+    return `
+      <tr class="${stCls}">
+        <td class="date">${escapeHtml(j._date)}</td>
+        <td>
+          <div class="title-cell">
+            <span class="title">${escapeHtml(j.title)}</span>
+            <a class="link" href="#" data-external="${escapeHtml(j.link)}">↗ Voir l'annonce</a>
+          </div>
+        </td>
+        <td>${escapeHtml(j.company)}</td>
+        <td>${escapeHtml(j.place||'')}</td>
+        <td class="grade">${g}</td>
+        <td>
+          <select class="status-select" data-id="${escapeHtml(j.id)}" data-role="status">
+            ${Object.entries(STATUS_DEFS).map(([k,v])=>
+              `<option value="${k}" ${st===k?'selected':''}>${v.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="actions">
+          <button class="apply" data-id="${escapeHtml(j.id)}" data-act="applied">Apply</button>
+          <button class="skip" data-id="${escapeHtml(j.id)}" data-act="skipped">Skip</button>
+          <button data-id="${escapeHtml(j.id)}" data-act="">Undo</button>
+        </td>
+        <td><textarea class="note" data-id="${escapeHtml(j.id)}" placeholder="notes...">${escapeHtml(note)}</textarea></td>
+      </tr>`;
+  }).join('');
+
+  $('#table-wrap').innerHTML=`
+    <table><thead><tr>
+      <th>date</th><th>title</th><th>company</th><th>place</th>
+      <th>grade</th><th>status</th><th>actions</th><th>notes</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+
+  wireExternalLinks('#table-wrap a[data-external]');
+  $$('button[data-act]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.id, a=b.dataset.act;
+    if(!a)clearStatus(id);else setStatus(id,a);
+    renderAll();
+  }));
+  $$('select[data-role="status"]').forEach(s=>s.addEventListener('change',()=>{
+    setStatus(s.dataset.id,s.value);renderAll();
+  }));
+  $$('textarea.note').forEach(t=>t.addEventListener('input',()=>setNote(t.dataset.id,t.value)));
+}
+
+/* =====================================================================
+   DASHBOARD
+   ===================================================================== */
+function pipelineEntries(){
+  return Object.entries(reviewed)
+    .filter(([,r])=>r&&PIPELINE_STATUSES.includes(r.status))
+    .map(([id,r])=>({id,...r}));
+}
+function renderDashboard(){
+  renderGettingStarted();
+  const entries=pipelineEntries();
+  const total=entries.length;
+  const now=new Date();
+  const weekStart=isoWeekStart(now).toISOString().slice(0,10);
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
+
+  const thisWeek=entries.filter(e=>e.appliedDate>=weekStart).length;
+  const thisMonth=entries.filter(e=>e.appliedDate>=monthStart).length;
+  const responded=entries.filter(e=>RESPONDED_STATUSES.includes(e.status)).length;
+  const interviews=entries.filter(e=>['interview','offer'].includes(e.status)).length;
+  const offers=entries.filter(e=>e.status==='offer').length;
+
+  $('#st-total').textContent=total;
+  $('#st-total-sub').textContent=`${thisMonth} this month · ${entries.filter(e=>ACTIVE_STATUSES.includes(e.status)).length} active`;
+  $('#st-week').textContent=thisWeek;
+  $('#st-week-sub').textContent=`since ${fmtDate(weekStart)} · goal ${settings.dailyGoal}/day`;
+  const rate=total?Math.round(100*responded/total):0;
+  $('#st-rate').textContent=rate+'%';
+  $('#st-rate-sub').textContent=`${responded} replies / ${total} applications`;
+  $('#st-iv').textContent=interviews;
+  $('#st-iv-sub').textContent=`${offers} offer${offers===1?'':'s'}`;
+
+  renderPie();
+  renderWeeklyBars();
+  renderFollowUps();
+  renderRecentActivity();
+  renderCalendar();
+}
+
+/* =====================================================================
+   PIE (Day / Month / Year)
+   ===================================================================== */
+function pieFilter(){
+  const y=calState.year, m=calState.month;
+  if(pieState.period==='day'){
+    const d=pieState.day||todayStr();
+    const label=new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+    return {label:'Day · '+label, test:id=>actionDate(id)===d};
+  }
+  if(pieState.period==='month'){
+    const ym=`${y}-${String(m+1).padStart(2,'0')}`;
+    const label=new Date(y,m,1).toLocaleString('en',{month:'long',year:'numeric'});
+    return {label:'Month · '+label, test:id=>(actionDate(id)||'').startsWith(ym)};
+  }
+  return {label:'Year · '+y, test:id=>(actionDate(id)||'').startsWith(String(y))};
+}
+function renderPie(){
+  const {label,test}=pieFilter();
+  $('#pie-period').textContent=label;
+  $$('#pie-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.p===pieState.period));
+
+  const counts={};
+  for(const k of Object.keys(STATUS_DEFS))counts[k]=0;
+  for(const [id,r] of Object.entries(reviewed)){
+    if(!r||!r.status)continue;
+    if(!test(id))continue;
+    if(counts[r.status]!==undefined)counts[r.status]++;
+  }
+  const data=Object.entries(STATUS_DEFS)
+    .map(([k,def])=>({key:k,label:def.label,color:def.color,value:counts[k]}))
+    .filter(d=>d.value>0);
+
+  if(!data.length){
+    $('#pie-wrap').innerHTML='<div class="hint">No activity in this period.</div>';
+    return;
+  }
+  const total=data.reduce((s,d)=>s+d.value,0);
+  const r=62,cx=80,cy=80,inner=38;
+  let angle=-Math.PI/2,paths='';
+  for(const d of data){
+    const slice=(d.value/total)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+slice),y2=cy+r*Math.sin(angle+slice);
+    const xi1=cx+inner*Math.cos(angle),yi1=cy+inner*Math.sin(angle);
+    const xi2=cx+inner*Math.cos(angle+slice),yi2=cy+inner*Math.sin(angle+slice);
+    const large=slice>Math.PI?1:0;
+    paths+=`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${xi2} ${yi2} A ${inner} ${inner} 0 ${large} 0 ${xi1} ${yi1} Z" fill="${d.color}" opacity=".9"/>`;
+    angle+=slice;
+  }
+  $('#pie-wrap').innerHTML=`
+    <svg viewBox="0 0 160 160" width="160" height="160">${paths}
+      <text x="80" y="78" text-anchor="middle" fill="#e8eaed" font-size="18" font-weight="700">${total}</text>
+      <text x="80" y="93" text-anchor="middle" fill="#8b9095" font-size="9.5">jobs</text>
+    </svg>
+    <div class="legend">
+      ${data.map(d=>`<div class="row"><span class="sw" style="background:${d.color}"></span><span>${d.label}</span><span class="val" style="color:${d.color}">${d.value}</span></div>`).join('')}
+    </div>`;
+}
+
+/* =====================================================================
+   WEEKLY BARS
+   ===================================================================== */
+function renderWeeklyBars(){
+  const weeks=[];
+  const start=isoWeekStart(new Date());
+  start.setDate(start.getDate()-7*7);
+  for(let i=0;i<8;i++){
+    const ws=new Date(start);ws.setDate(ws.getDate()+i*7);
+    const we=new Date(ws);we.setDate(we.getDate()+7);
+    const wsStr=ws.toISOString().slice(0,10);
+    const weStr=we.toISOString().slice(0,10);
+    const count=Object.values(reviewed).filter(r=>
+      r&&PIPELINE_STATUSES.includes(r.status)&&r.appliedDate>=wsStr&&r.appliedDate<weStr
+    ).length;
+    weeks.push({ws,count});
+  }
+  const max=Math.max(1,...weeks.map(w=>w.count));
+  $('#bars').innerHTML=weeks.map(w=>{
+    const h=Math.round((w.count/max)*90);
+    const lbl=`${w.ws.getDate()}/${w.ws.getMonth()+1}`;
+    return `<div class="bar" title="week of ${lbl}: ${w.count}">
+      <div class="n ${w.count?'':'zero'}">${w.count||''}</div>
+      <div class="stack"><div class="seg" style="height:${h}px"></div></div>
+      <div class="lbl">${lbl}</div></div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   FOLLOW-UPS + RECENT ACTIVITY
+   ===================================================================== */
+function renderFollowUps(){
+  const today=todayStr();
+  const items=Object.entries(reviewed)
+    .filter(([,r])=>r&&r.followUpDate)
+    .map(([id,r])=>({id,...r}))
+    .sort((a,b)=>a.followUpDate>b.followUpDate?1:-1);
+
+  if(!items.length){$('#follow-list').innerHTML='<div class="hint">No follow-ups scheduled. Set one in the Applications tab.</div>';return;}
+  $('#follow-list').innerHTML=items.slice(0,12).map(it=>{
+    const m=metaOf(it.id);
+    const diff=daysBetween(today,it.followUpDate);
+    let cls='';if(diff<0)cls='late';else if(diff===0)cls='due';
+    const when=diff<0?`${-diff}d late`:(diff===0?'today':`in ${diff}d`);
+    return `<div class="follow-item ${cls}">
+      <span class="when">${fmtDate(it.followUpDate)}</span>
+      <span class="who">${escapeHtml(m.title)} — ${escapeHtml(m.company)}</span>
+      <span class="hint">${when}</span></div>`;
+  }).join('');
+}
+function renderRecentActivity(){
+  const events=[];
+  for(const [id,r] of Object.entries(reviewed)){
+    if(!r||!Array.isArray(r.history))continue;
+    for(const h of r.history)events.push({id,to:h.to,date:h.date,ts:h.ts||0});
+  }
+  events.sort((a,b)=>b.ts-a.ts);
+  const recent=events.slice(0,15);
+  if(!recent.length){$('#recent-list').innerHTML='<div class="hint">No activity yet.</div>';return;}
+  $('#recent-list').innerHTML=recent.map(e=>{
+    const m=metaOf(e.id);
+    const def=STATUS_DEFS[e.to]||{label:e.to,color:'#8b9095'};
+    return `<div class="follow-item">
+      <span class="when">${fmtDate(e.date)}</span>
+      <span class="who">${escapeHtml(m.title)}</span>
+      <span class="pill" style="border-color:${def.color}55">
+        <span class="dot" style="background:${def.color}"></span>${def.label}</span></div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   CALENDAR
+   ===================================================================== */
+function dominantOf(stats){
+  const ks=Object.keys(stats);if(!ks.length)return null;
+  if(ks.length===1)return ks[0];
+  for(const s of ['offer','interview','applied','screening'])if(stats[s])return s;
+  if(stats.new)return 'new';
+  if(stats.rejected)return 'rejected';
+  if(stats.withdrawn)return 'withdrawn';
+  return 'skipped';
+}
+function filterStatsByMetric(stats,metric){
+  if(metric==='any')return stats;
+  const groups={applied:['applied','screening','interview','offer'],skipped:['skipped'],new:['new']};
+  const allowed=groups[metric]||[];
+  const out={};for(const [s,n] of Object.entries(stats))if(allowed.includes(s))out[s]=n;
+  return out;
+}
+function renderCalendar(){
+  const {year,month,metric}=calState;
+  const first=new Date(year,month,1);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const startOffset=(first.getDay()+6)%7;
+  $('#cal-title').textContent=first.toLocaleString('en',{month:'long',year:'numeric'});
+
+  const perDay={};
+  for(const [id,r] of Object.entries(reviewed)){
+    if(!r)continue;
+    const d=actionDate(id);
+    if(!d)continue;
+    perDay[d]=perDay[d]||{};
+    const s=r.status||'new';
+    perDay[d][s]=(perDay[d][s]||0)+1;
+  }
+
+  const today=todayStr();
+  let cells='';
+  for(let i=0;i<startOffset;i++)cells+='<div class="cal-cell empty"></div>';
+
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const raw=perDay[ds]||{};
+    const stats=filterStatsByMetric(raw,metric);
+    const total=Object.values(stats).reduce((a,b)=>a+b,0);
+    const dom=dominantOf(stats);
+
+    let style='';
+    if(dom){const c=DAY_THEME[dom].color;style=`background:${hexToRgba(c,.16)};border-color:${hexToRgba(c,.55)}`;}
+
+    let chips='';
+    if(total>0){
+      const sorted=Object.entries(stats).sort((a,b)=>{
+        const ia=CHIP_ORDER.indexOf(a[0]), ib=CHIP_ORDER.indexOf(b[0]);
+        return ia!==ib?ia-ib:b[1]-a[1];
+      }).slice(0,3);
+      const parts=sorted.map(([s,n])=>{
+        const c=DAY_THEME[s]?.color||'#fff';
+        return `<b style="color:${c}">${n}</b>`;
+      });
+      chips=`<span class="chips">${parts.join('<span class="sep">·</span>')}</span>`;
+    }
+
+    let stripe='';
+    if(total>0){
+      const segs=Object.entries(stats).sort((a,b)=>CHIP_ORDER.indexOf(a[0])-CHIP_ORDER.indexOf(b[0]))
+        .map(([s,n])=>`<span style="background:${DAY_THEME[s]?.color||'#8b9095'};flex:${n}"></span>`).join('');
+      stripe=`<span class="stripe">${segs}</span>`;
+    }
+
+    let tooltip='';
+    if(total>0){
+      const rows=Object.entries(stats).sort((a,b)=>b[1]-a[1]).map(([s,n])=>{
+        const t=DAY_THEME[s]||{label:s,color:'#8b9095'};
+        return `<div class="tt-row"><span class="dot2" style="background:${t.color}"></span>${t.label}<span class="tt-n">${n}</span></div>`;
+      }).join('');
+      tooltip=`<span class="tooltip">${rows}</span>`;
+    }
+
+    const cls=['cal-cell'];
+    if(total>0)cls.push('has');
+    if(ds===today)cls.push('today');
+
+    cells+=`<div class="${cls.join(' ')}" data-date="${ds}" style="${style}">
+      <span class="num">${d}</span>
+      ${chips}${stripe}${tooltip}
+    </div>`;
+  }
+
+  $('#cal-grid').innerHTML=cells;
+  $('#cal-metric').value=metric;
+
+  // Click toggles: same day + already open = close; otherwise open on that day
+  $$('#cal-grid .cal-cell:not(.empty)').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const d=el.dataset.date;
+      const drawer=$('#day-drawer');
+      if(drawer.classList.contains('open') && drawerDate===d){
+        drawer.classList.remove('open');
+        drawerDate=null;
+      } else {
+        openDayDrawer(d);
+      }
+    });
+  });
+
+  if(pieState.period==='month'||pieState.period==='year')renderPie();
+}
+
+/* =====================================================================
+   DAY DRAWER
+   ===================================================================== */
+function openDayDrawer(dateStr){
+  drawerDate=dateStr;
+  const nice=new Date(dateStr+'T00:00:00').toLocaleDateString('en',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('#day-title').textContent=nice;
+  $('#day-status').value='';
+  pieState.period='day';
+  pieState.day=dateStr;
+  renderPie();
+  renderDayList();
+  $('#day-drawer').classList.add('open');
+}
+function renderDayList(){
+  if(!drawerDate)return;
+  const filter=$('#day-status').value;
+  const items=[];
+  for(const [id,r] of Object.entries(reviewed)){
+    if(!r)continue;
+    if(actionDate(id)!==drawerDate)continue;
+    if(filter&&r.status!==filter)continue;
+    items.push({id,...r});
+  }
+  items.sort((a,b)=>CHIP_ORDER.indexOf(a.status)-CHIP_ORDER.indexOf(b.status));
+  $('#day-count').textContent=`${items.length} job${items.length===1?'':'s'}`;
+
+  if(!items.length){$('#day-list').innerHTML='<div class="hint">No jobs for that day with this filter.</div>';return;}
+
+  $('#day-list').innerHTML=items.map(it=>{
+    const m=metaOf(it.id);
+    const def=STATUS_DEFS[it.status]||{label:it.status,color:'#8b9095'};
+    const applied=it.appliedDate?`<span>applied ${fmtDate(it.appliedDate)}</span>`:'';
+    const link=m.link?`<a href="#" data-external="${escapeHtml(m.link)}">open ↗</a>`:'';
+    const statusOpts=Object.entries(STATUS_DEFS).map(([k,v])=>
+      `<option value="${k}" ${it.status===k?'selected':''}>${v.label}</option>`).join('');
+    return `
+      <div class="day-job">
+        <div class="t">${escapeHtml(m.title)}</div>
+        <div class="m">
+          <span>${escapeHtml(m.company)}</span>
+          ${m.place?`<span>· ${escapeHtml(m.place)}</span>`:''}
+          <span class="pill" style="border-color:${def.color}55">
+            <span class="dot" style="background:${def.color}"></span>${def.label}</span>
+          ${applied}${link}
+        </div>
+        ${it.note?`<div class="m">${escapeHtml(it.note)}</div>`:''}
+        <div class="quick">
+          <select data-id="${escapeHtml(it.id)}" data-role="qstatus">${statusOpts}</select>
+          <button data-id="${escapeHtml(it.id)}" data-role="qjump">→ Open in Review</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  wireExternalLinks('#day-list a[data-external]');
+  $$('#day-list select[data-role="qstatus"]').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      setStatus(sel.dataset.id,sel.value);
+      renderDayList();
+      renderCalendar();
+      renderPie();
+    });
+  });
+  $$('#day-list button[data-role="qjump"]').forEach(btn=>{
+    btn.addEventListener('click',()=>jumpToReview(btn.dataset.id));
+  });
+}
+function jumpToReview(id){
+  const m=metaOf(id);
+  $('#day-drawer').classList.remove('open');
+  switchTab('review');
+  $('#f-status').value='';
+  $('#f-date-from').value='';
+  $('#f-date-to').value='';
+  $('#f-search').value=m.title;
+  renderReview();
+  requestAnimationFrame(()=>{
+    const rows=$$('#table-wrap tbody tr');
+    const target=rows.find(tr=>tr.querySelector(`[data-id="${CSS.escape(id)}"]`));
+    if(target){
+      target.scrollIntoView({behavior:'smooth',block:'center'});
+      target.style.transition='background .3s';
+      target.style.background='rgba(78,161,255,.22)';
+      setTimeout(()=>target.style.background='',1200);
+    }
+  });
+}
+
+/* =====================================================================
+   TRACKER
+   ===================================================================== */
+function renderTracker(){
+  const fStatus=$('#t-status').value;
+  const fSearch=$('#t-search').value.toLowerCase().trim();
+  let items=pipelineEntries();
+  if(fStatus)items=items.filter(e=>e.status===fStatus);
+  if(fSearch)items=items.filter(e=>{
+    const m=metaOf(e.id);
+    return (m.title+' '+m.company).toLowerCase().includes(fSearch);
+  });
+  items.sort((a,b)=>(b.appliedDate||'')>(a.appliedDate||'')?1:-1);
+  $('#t-count').textContent=`${items.length} application${items.length===1?'':'s'}`;
+
+  if(!items.length){$('#tracker-wrap').innerHTML='<div class="empty">No applications yet. Mark jobs as "Apply" in the Review tab.</div>';return;}
+
+  const today=todayStr();
+  const rows=items.map(it=>{
+    const m=metaOf(it.id);
+    const days=it.appliedDate?daysBetween(it.appliedDate,today):'';
+    const link=m.link?`<a href="#" data-external="${escapeHtml(m.link)}">↗</a>`:'';
+    return `<tr class="tracker">
+      <td class="date">${it.appliedDate?fmtDate(it.appliedDate):'—'}</td>
+      <td>${days!==''?`<span class="hint">${days}d</span>`:''}</td>
+      <td><div class="title-cell"><span class="title">${escapeHtml(m.title)}</span>${link}</div></td>
+      <td>${escapeHtml(m.company)}</td>
+      <td>${escapeHtml(m.place||'')}</td>
+      <td><select class="status-select" data-id="${escapeHtml(it.id)}" data-role="tstatus">
+        ${PIPELINE_STATUSES.map(k=>`<option value="${k}" ${it.status===k?'selected':''}>${STATUS_DEFS[k].label}</option>`).join('')}
+      </select></td>
+      <td><input type="date" data-id="${escapeHtml(it.id)}" data-role="followup" value="${escapeHtml(it.followUpDate||'')}"></td>
+      <td><textarea class="note" data-id="${escapeHtml(it.id)}" data-role="tnote" placeholder="notes...">${escapeHtml(it.note||'')}</textarea></td>
+    </tr>`;
+  }).join('');
+
+  $('#tracker-wrap').innerHTML=`<table><thead><tr>
+    <th>applied</th><th>age</th><th>title</th><th>company</th><th>place</th>
+    <th>status</th><th>follow-up</th><th>notes</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+
+  wireExternalLinks('#tracker-wrap a[data-external]');
+  $$('select[data-role="tstatus"]').forEach(s=>s.addEventListener('change',()=>{
+    setStatus(s.dataset.id,s.value);renderAll();
+  }));
+  $$('input[data-role="followup"]').forEach(i=>i.addEventListener('change',()=>{
+    setFollowUp(i.dataset.id,i.value);renderDashboard();
+  }));
+  $$('textarea[data-role="tnote"]').forEach(t=>t.addEventListener('input',()=>setNote(t.dataset.id,t.value)));
+}
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+function switchTab(tab){
+  currentTab=tab;
+  $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+tab));
+  if(tab==='dashboard')renderDashboard();
+  if(tab==='tracker')renderTracker();
+  if(tab==='review')renderReview();
+}
+function renderAll(){
+  if(currentTab==='dashboard')renderDashboard();
+  if(currentTab==='review')renderReview();
+  if(currentTab==='tracker')renderTracker();
+  if(allJobs.length)$('#count').textContent=`${allJobs.length} jobs loaded`;
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+$$('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+
+$('#btn-load').addEventListener('click',()=>$('#file-input').click());
+$('#file-input').addEventListener('change',e=>{
+  if(e.target.files.length)loadFiles(e.target.files);
+  e.target.value='';
+});
+
+$('#btn-load-folder').addEventListener('click',async ()=>{
+  // Prefer the File System Access API (Chromium). Firefox will fall through to
+  // the hidden <input webkitdirectory> which behaves like a normal multi-file picker.
+  if(typeof window.showDirectoryPicker==='function'){
+    try{
+      const dir=await window.showDirectoryPicker();
+      const files=[];
+      async function walk(d){
+        for await (const entry of d.values()){
+          if(entry.kind==='file'){
+            if(/(?:jobs_|filtered_)\d{4}-\d{2}-\d{2}\.json$/.test(entry.name)){
+              files.push(await entry.getFile());
+            }
+          } else if(entry.kind==='directory'){
+            await walk(entry);
+          }
+        }
+      }
+      await walk(dir);
+      if(files.length)loadFiles(files);
+      else toast('No jobs_*.json or filtered_*.json found','err');
+    }catch(e){
+      if(e.name!=='AbortError')toast('Folder picker failed: '+e.message,'err');
+    }
+  } else {
+    // Firefox / Safari: multi-file picker
+    $('#folder-input').click();
+    toast('Firefox: shift-click to select all filtered_*.json in the folder','ok');
+  }
+});
+$('#folder-input').addEventListener('change',e=>{
+  const files=Array.from(e.target.files).filter(f=>
+    /(?:^|\/)(?:jobs_|filtered_)\d{4}-\d{2}-\d{2}\.json$/.test(f.webkitRelativePath||f.name)
+  );
+  if(files.length)loadFiles(files);
+  else toast('No jobs_*.json or filtered_*.json in that folder','err');
+  e.target.value='';
+});
+
+// User-initiated refresh only. The Rust command stages all fetched listings in a
+// single transaction; it does NOT change jobs/reviews or promote candidates.
+let refreshInProgress=false;
+const refreshPhases={fetch:'Fetching job listings',details:'Checking descriptions',classify:'Classifying jobs',save:'Saving to SQLite',sources:'Refreshing additional sources'};
+function showRefreshProgress(item){
+  const panel=$('#refresh-progress');panel.hidden=false;
+  const phase=refreshPhases[item.phase] || (item.phase==='cancelled'?'Refresh cancelled':item.phase==='error'?'Refresh failed':item.phase==='complete'?'Refresh complete':'Refreshing jobs');
+  $('#refresh-phase').textContent=phase;
+  $('#refresh-detail').textContent=item.message||phase;
+  const completed=Number(item.completed||0);
+  const total=Number(item.total);
+  const hasTotal=item.total!==null && item.total!==undefined && Number.isFinite(total) && total>0;
+  const meter=$('#refresh-meter');
+  if(hasTotal){meter.max=total;meter.value=Math.min(completed,total);}
+  else if(item.phase==='error'||item.phase==='cancelled'){meter.max=1;meter.value=0;}
+  else if(item.phase==='complete'){meter.max=1;meter.value=1;}
+  else{meter.removeAttribute('value');}
+  $('#refresh-fraction').textContent=hasTotal?`${completed} / ${total}`:'';
+}
+// Swiss-focused source launch panel. Never claim to have connected an API until verified.
+const SWISS_SOURCES=[
+  {name:'Jobup',url:'https://www.jobup.ch/fr/',mode:'Collecteur Rust'},
+  {name:'Jobs.ch',url:'https://www.jobs.ch/fr/',mode:'Collecteur Rust; recherche a verifier'},
+  {name:'Indeed Suisse',url:'https://ch.indeed.com/',mode:'Site officiel uniquement'},
+  {name:'Emploi en Suisse',url:'https://emploi-en-suisse.ch/',mode:'Site officiel uniquement'},
+  {name:'JobScout24',url:'https://www.jobscout24.ch/fr/',mode:'Collecteur Rust'},
+  {name:'OK Job',url:'https://www.okjob.ch/offres-demplois/',mode:'Collecteur Rust'},
+  {name:'100000jobs',url:'https://www.100000jobs.ch/',mode:'Site officiel uniquement'},
+  {name:'Job-Room',url:'https://www.job-room.ch/index.html',mode:'Site officiel uniquement'},
+  {name:'Züri Jobs',url:'https://www.zueri.jobs/jobs',mode:'Collecteur Rust experimental'},
+  {name:'Michael Page',url:'https://www.michaelpage.ch/jobs',mode:'Collecteur Rust experimental'},
+  {name:'LinkedIn Jobs',url:'https://www.linkedin.com/jobs/',mode:'Collecteur public experimental'},
+  {name:'SwissDevJobs',url:'https://swissdevjobs.ch/jobs',mode:'Site officiel uniquement'},
+  {name:'eFinancialCareers',url:'https://www.efinancialcareers.ch/jobs',mode:'Site officiel uniquement'}
+];
+const lastVisits=(()=>{try{return JSON.parse(localStorage.getItem('jobup_swiss_source_visits_v1')||'{}')}catch{return {}}})();
+function renderSwissSources(){
+  const list=$('#swiss-sources-list');list.replaceChildren();
+  SWISS_SOURCES.forEach(source=>{
+    const item=document.createElement('div');item.style.cssText='padding:10px;border:1px solid var(--border);border-radius:8px;';
+    const name=document.createElement('strong');name.textContent=source.name;
+    const info=document.createElement('div');info.style.cssText='font-size:11px;opacity:.8;margin:5px 0';info.textContent=source.mode;
+    const seen=document.createElement('div');seen.style.cssText='font-size:11px;opacity:.7;margin-bottom:5px';
+    seen.textContent=lastVisits[source.name]?'Last opened: '+new Date(lastVisits[source.name]).toLocaleString():'Not opened from this app';
+    const link=document.createElement('a');link.href='#';link.textContent='Open '+source.name;link.style.cursor='pointer';
+    link.addEventListener('click',ev=>{ev.preventDefault();openExternalUrl(source.url);});
+    link.addEventListener('click',()=>{lastVisits[source.name]=new Date().toISOString();localStorage.setItem('jobup_swiss_source_visits_v1',JSON.stringify(lastVisits));seen.textContent='Last opened: '+new Date(lastVisits[source.name]).toLocaleString();});
+    item.append(name,info,seen,link);list.append(item);
+  });
+}
+
+// Statuses reflect ACTUAL native commands; never infer success from opening a link.
+const SOURCE_DIAG_KEY='jobup_collection_diagnostics_v1';
+let sourceDiagnostics={};
+try{const saved=JSON.parse(localStorage.getItem(SOURCE_DIAG_KEY)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))sourceDiagnostics=saved;}catch{}
+function setCollectorStatus(name,status,details={}){
+  const previous=sourceDiagnostics[name]||{};
+  const next={status,attemptedAt:new Date().toISOString(),...details};
+  // Preserve the last success timestamp across runs.
+  if(status==='Success'||status==='Working') next.lastSuccessAt=next.attemptedAt;
+  else if(previous.lastSuccessAt) next.lastSuccessAt=previous.lastSuccessAt;
+  sourceDiagnostics[name]=next;
+  try{localStorage.setItem(SOURCE_DIAG_KEY,JSON.stringify(sourceDiagnostics));}catch{}
+  renderCollectorDiagnostics();
+}
+function renderCollectorDiagnostics(){
+  const target=$('#source-diagnostics-rows');if(!target)return;
+  target.replaceChildren();
+  const table=document.createElement('table');table.style.width='100%';table.style.fontSize='12px';
+  const head=document.createElement('tr');
+  for(const label of ['Source','Status','Last attempt','Last success','Fetched','New','Rev','Unchanged','Desc used','Elig','Excl','Unv','Dur','Error']){
+    const th=document.createElement('th');th.textContent=label;head.append(th);
+  }
+  table.append(head);
+  for(const source of SWISS_SOURCES){
+    const result=sourceDiagnostics[source.name]||{};
+    const row=document.createElement('tr');
+    const cell=(txt,extra={})=>{const td=document.createElement('td');td.textContent=txt;if(extra.title)td.title=extra.title;if(extra.color)td.style.color=extra.color;return td;};
+    row.append(cell(source.name));
+    const statusColors={
+      'Success':'var(--ok)','Working':'var(--ok)','Partial':'var(--warn)',
+      'Failed':'var(--skip)','Blocked':'var(--skip)','Cancelled':'var(--muted)',
+      'Unavailable':'var(--muted)','Running':'var(--accent)'
+    };
+    const status=result.status || (['Jobup','Jobs.ch','OK Job','Emploi en Suisse','100000jobs'].includes(source.name)?'Not run in this session':'Unavailable');
+    row.append(cell(status,{color:statusColors[status]||'var(--muted)'}));
+    row.append(cell(result.attemptedAt?new Date(result.attemptedAt).toLocaleTimeString():'—'));
+    row.append(cell(result.lastSuccessAt?new Date(result.lastSuccessAt).toLocaleTimeString():'—'));
+    const n=(v)=>v===undefined||v===null?'—':String(v);
+    row.append(cell(n(result.fetched ?? result.checked)));
+    row.append(cell(n(result.newCount)));
+    row.append(cell(n(result.revised ?? result.updated)));
+    row.append(cell(n(result.duplicates)));
+    row.append(cell(n(result.descriptions)));
+    row.append(cell(n(result.eligible)));
+    row.append(cell(n(result.excluded)));
+    row.append(cell(n(result.unverified)));
+    row.append(cell(result.durationMs!==undefined?Math.round(result.durationMs)+' ms':'—'));
+    row.append(cell(result.message || (status==='Unavailable'?'No native collector available in this build.':'—'),{title:result.message||''}));
+    table.append(row);
+  }
+  target.append(table);
+}
+$('#source-diagnostics-clear').addEventListener('click',()=>{sourceDiagnostics={};try{localStorage.removeItem(SOURCE_DIAG_KEY);}catch{}renderCollectorDiagnostics();});
+renderCollectorDiagnostics();
+
+// Step 20: only user supplied data; no external website scraping or auto-approval.
+let swissPending=[];
+const swissCsvRows=(text,sep)=>{
+  const rows=[];let cells=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"') {if(quoted && text[i+1]==='"'){cell+='"';i++;}else quoted=!quoted;}
+    else if(c===sep && !quoted){cells.push(cell);cell='';}
+    else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;cells.push(cell);if(cells.some(x=>x.trim()))rows.push(cells);cells=[];cell='';}
+    else cell+=c;
+  }
+  if(quoted)throw Error('CSV has an unclosed quote');
+  cells.push(cell);if(cells.some(x=>x.trim()))rows.push(cells);
+  if(rows.length<2)throw Error('CSV requires a header and at least one row');
+  const headers=rows.shift().map(x=>x.trim().toLowerCase());
+  return rows.map(row=>Object.fromEntries(headers.map((h,i)=>[h,row[i]||''])));
+};
+const swissNormalize=(obj)=>{
+  const get=(...keys)=>{for(const k of keys){const x=obj[k];if(x!==undefined&&x!==null&&String(x).trim())return String(x).trim();}return '';};
+  return {title:get('title','titre','job_title','position'),company:get('company','entreprise','employer','employeur'),place:get('place','location','lieu','localite','localité','city'),url:get('url','link','lien','listing_url','listingUrl','job_url'),description:get('description','details','texte'),sourceId:get('id','sourceId','source_id')};
+};
+function swissParse(text){
+  const t=text.trim();if(!t)throw Error('Paste vacancy data first');
+  let objects;
+  if(t.startsWith('[')||t.startsWith('{')){
+    const json=JSON.parse(t); objects=Array.isArray(json)?json:(Array.isArray(json.jobs)?json.jobs:[json]);
+  }else if(/^https:\/\//i.test(t)){
+    objects=[{url:t,title:'Vacancy — title not supplied'}];
+  }else {objects=swissCsvRows(t,t.split('\n')[0].includes('\t')?'\t':',');}
+  if(objects.length===0||objects.length>2000)throw Error('Import must contain 1 to 2000 vacancies');
+  const items=objects.map((o,i)=>{if(!o||typeof o!=='object'||Array.isArray(o))throw Error(`Row ${i+1}: expected an object`);const x=swissNormalize(o);if(!x.url||!x.title)throw Error(`Row ${i+1}: URL and title required`);return x;});
+  return items;
+}
+// Fit short examples without a misleading internal scrollbar; cap long exports.
+function resizeSwissImport(){
+  const field=$('#swiss-import-input');
+  field.style.height='auto';
+  field.style.height=Math.min(360,Math.max(112,field.scrollHeight+2))+'px';
+}
+$('#swiss-import-input').addEventListener('input',()=>{
+  swissPending=[];
+  $('#swiss-save-import').disabled=true;
+  resizeSwissImport();
+});
+resizeSwissImport();
+$('#swiss-import-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  if(file.size>500000){$('#swiss-import-report').textContent='File too large (max 500 KB)';return;}
+  $('#swiss-import-input').value=await file.text();resizeSwissImport();swissPending=[];$('#swiss-save-import').disabled=true;
+  $('#swiss-import-report').textContent=`Loaded ${file.name}; preview before saving`;
+});
+$('#swiss-preview-import').addEventListener('click',()=>{
+  const report=$('#swiss-import-report');const preview=$('#swiss-import-preview');preview.replaceChildren();
+  try{
+    swissPending=swissParse($('#swiss-import-input').value);
+    const table=document.createElement('table');const head=document.createElement('tr');
+    for(const k of ['Title','Company','Location','URL']){const th=document.createElement('th');th.textContent=k;head.appendChild(th);}table.appendChild(head);
+    for(const x of swissPending.slice(0,25)){const tr=document.createElement('tr');for(const val of [x.title,x.company,x.place,x.url]){const td=document.createElement('td');td.textContent=val;tr.appendChild(td);}table.appendChild(tr);}preview.appendChild(table);
+    report.textContent=`${swissPending.length} vacancies ready for conservative classification and staging. Full descriptions are required for Eligible status. Showing first 25.`;
+    $('#swiss-save-import').disabled=!nativeReady;
+  }catch(err){swissPending=[];$('#swiss-save-import').disabled=true;report.textContent='Import error: '+err.message;}
+});
+$('#swiss-source').addEventListener('change',()=>{
+  swissPending=[];$('#swiss-save-import').disabled=true;
+  $('#swiss-import-report').textContent='Source changed; preview again before saving';
+});
+$('#swiss-save-import').addEventListener('click',async()=>{
+  if(!nativeReady||!swissPending.length)return;
+  const btn=$('#swiss-save-import');btn.disabled=true;
+  try{
+    const r=await invokeNative('import_swiss_listings',{source:$('#swiss-source').value,items:swissPending});
+    $('#swiss-import-report').textContent=`Saved: ${r.inserted} new, ${r.revised} revised, ${r.unchanged} unchanged, ${r.duplicatesInBatch} duplicates within file; classified using supplied information; incomplete listings remain Unverified. Reviews untouched.`;
+    swissPending=[];
+  }catch(err){$('#swiss-import-report').textContent='Nothing saved: '+err;btn.disabled=false;}
+});
+
+$('#btn-swiss-sources').addEventListener('click',()=>{$('#swiss-sources-panel').hidden=false;renderSwissSources();renderCollectorDiagnostics();});
+$('#btn-swiss-close').addEventListener('click',()=>{$('#swiss-sources-panel').hidden=true;});
+$('#btn-swiss-import').addEventListener('click',()=>$('#file-input').click());
+try{const p=localStorage.getItem('jobup_refresh_window_v1');if(['1','3','7'].includes(p))$('#refresh-window').value=p;}catch{}
+$('#refresh-window').addEventListener('change',()=>localStorage.setItem('jobup_refresh_window_v1',$('#refresh-window').value));
+
+$('#btn-refresh-native').addEventListener('click',()=>window.jobupNavigate?.('search'));
+
+$('#btn-refresh-cancel').addEventListener('click',async()=>{
+  if(!refreshInProgress)return;
+  window.jobupCancelRequested=true;
+  const cancel=$('#btn-refresh-cancel');cancel.disabled=true;
+  cancel.textContent='Stopping…';
+  try{
+    const active=await invokeNative('cancel_jobup_refresh');
+    if(!active)toast('Cancellation requested for remaining collectors','ok');
+  }catch(error){console.error('Cancel request failed',error);toast('Cancel failed: '+error,'err');cancel.disabled=false;}
+});
+
+let auditOffset=0;
+let auditLoading=false;
+async function loadAudit(reset=false){
+  if(auditLoading)return;
+  auditLoading=true;
+  const more=$('#audit-more');
+  more.disabled=true;
+  try{
+    if(reset){auditOffset=0;$('#audit-results').replaceChildren();}
+    const type=$('#audit-class').value;
+    const rows=await invokeNative('inspect_staged_listings',{classification:type,limit:50,offset:auditOffset});
+    const container=$('#audit-results');
+    const table=document.createElement('table');
+    const header=document.createElement('tr');
+    for(const label of ['Title','Company / place','Reason','Source']){
+      const th=document.createElement('th');th.textContent=label;header.appendChild(th);
+    }
+    table.appendChild(header);
+    for(const record of rows){
+      const tr=document.createElement('tr');
+      const title=document.createElement('td');title.textContent=record.title;tr.appendChild(title);
+      const employer=document.createElement('td');employer.textContent=`${record.company} — ${record.place}`;tr.appendChild(employer);
+      const reason=document.createElement('td');
+      const evidence=Array.isArray(record.evidence)?record.evidence:[];
+      const lines=evidence.map(e=>`${e.category}: ${e.quote || e.explanation || ''}`).filter(Boolean);
+      reason.textContent=lines.join(' | ') || record.legacyReason || record.detailStatus || 'No reason recorded';
+      tr.appendChild(reason);
+      const source=document.createElement('td');
+      const link=document.createElement('a');
+      link.href=record.listingUrl;link.textContent=record.source;
+      link.target='_blank';link.rel='noopener noreferrer';
+      source.appendChild(link);tr.appendChild(source);table.appendChild(tr);
+    }
+    container.appendChild(table);
+    auditOffset+=rows.length;
+    $('#audit-count').textContent=`${auditOffset} ${type} staged jobs displayed`;
+    more.hidden=rows.length<50;
+  }catch(error){console.error(error);toast('Audit failed: '+error,'err');}
+  finally{auditLoading=false;more.disabled=false;}
+}
+$('#btn-audit').addEventListener('click',()=>{$('#eligibility-audit').hidden=false;loadAudit(true);});
+$('#audit-close').addEventListener('click',()=>{$('#eligibility-audit').hidden=true;});
+$('#audit-load').addEventListener('click',()=>loadAudit(true));
+$('#audit-class').addEventListener('change',()=>loadAudit(true));
+$('#audit-more').addEventListener('click',()=>loadAudit(false));
+
+// Candidates are never moved into Review automatically; individual approval only.
+let candidateOffset=0;
+let candidateLoading=false;
+let candidateSeen=0;
+async function updateCandidateSummary(){
+  const target=$('#refresh-results-queue');
+  try{
+    // The native queue is paginated. Counting only its first page can
+    // incorrectly report zero pending candidates when others are farther down.
+    let scanned=0, pending=0, page=[];
+    const batch=100;
+    do {
+      page=await invokeNative('inspect_candidate_queue',{limit:batch,offset:scanned});
+      pending+=page.filter(c=>!c.alreadyInReviewQueue).length;
+      scanned+=page.length;
+    } while(page.length===batch && scanned<2000);
+    const capped=(page.length===batch && scanned>=2000);
+    let unverifiedPending=0, unverifiedScanned=0, unverifiedPage=[];
+    do {
+      unverifiedPage=await invokeNative('inspect_candidate_queue',{limit:100,offset:unverifiedScanned,includeUnverified:true});
+      unverifiedPending+=unverifiedPage.filter(c=>c.classification==='unverified'&&!c.alreadyInReviewQueue).length;
+      unverifiedScanned+=unverifiedPage.length;
+    } while(unverifiedPage.length===100 && unverifiedScanned<2000);
+    target.textContent=`${pending}${capped?'+':''} eligible candidate(s) awaiting review ${capped?'among the first 2000 staged eligible records':'across the eligible candidate queue'}; ${allJobs.length} jobs in Review. ${unverifiedPending} additional unverified-with-description candidate(s) can be reviewed manually. Refresh counts refer to fetched ads, not approvals.`;
+  }catch(error){target.textContent=`Candidate queue unavailable: ${error}`;}
+}
+async function loadCandidatePage(reset=false){
+  if(!nativeReady || candidateLoading)return;
+  candidateLoading=true;
+  const loadButton=$('#candidate-next-page');
+  loadButton.disabled=true;
+  if(reset){candidateOffset=0;candidateSeen=0;$('#candidate-panel-items').replaceChildren();}
+  const parent=$('#candidate-panel-items');
+  try{
+    await persistQueue;
+    const rows=await invokeNative('inspect_candidate_queue',{limit:50,offset:candidateOffset,includeUnverified:$('#candidate-include-unverified').checked});
+    candidateOffset+=rows.length;
+    const pending=rows.filter(c=>!c.alreadyInReviewQueue);
+    const sourceFilter=$('#candidate-source-filter').value;
+    const ageFilter=$('#candidate-age-filter').value;
+    const hideOutside=$('#candidate-hide-outside').checked;
+    for(const c of pending){
+      if(sourceFilter!=='all' && c.source!==sourceFilter)continue;
+      if(ageFilter!=='all' && c.retrievedAt){
+        const stamp=Date.parse(c.retrievedAt.replace(' ','T')+'Z');
+        if(Number.isFinite(stamp) && Date.now()-stamp>Number(ageFilter)*86400000)continue;
+      }
+      if(hideOutside && Array.isArray(c.notes) && c.notes.some(n=>/outside explicit preferred job families/i.test(String(n))))continue;
+      candidateSeen++;
+      const card=document.createElement('div');
+      const isUnverified=c.classification==='unverified';
+      card.style.cssText='border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+      const info=document.createElement('div');info.style.cssText='flex:1;min-width:220px';
+      const title=document.createElement('strong');title.textContent=c.title||'Untitled';info.append(title);
+      const meta=document.createElement('div');meta.className='hint';meta.textContent=`${isUnverified?'⚠ Unverified — check requirements':'✓ Eligible'} · ${c.company||'Unknown company'} · ${c.place||'Unknown location'} · ${c.source||'Unknown source'}${c.retrievedAt?' · Last seen '+c.retrievedAt.slice(0,10):''}`;info.append(meta);
+      // Expose classifier reasoning without requiring a separate detail window.
+      const usefulCats=new Set(['mandatory_diploma','mandatory_forklift','mandatory_german',
+        'mandatory_outbound','alcohol_sales','restricted_food_service','restricted_sector',
+        'restricted_accounting_career','specialized_occupation_title','regulated_profession',
+        'license_check','ambiguous_requirement','railway_qualification_check','food_sector_review','legacy_filter']);
+      const flags=[];
+      if(Array.isArray(c.notes))for(const n of c.notes){
+        if(typeof n==='string'&&!/Provisional rule-based eligibility|Preferred-only qualifications/.test(n))flags.push(n);
+      }
+      if(Array.isArray(c.evidence))for(const e of c.evidence){
+        if(e&&usefulCats.has(e.category))flags.push(`[${e.category}] ${String(e.explanation||e.quote||e.category).slice(0,140)}`);
+      }
+      if(flags.length){
+        const reasons=document.createElement('div');reasons.className='hint';
+        reasons.style.cssText='font-size:11px;margin-top:4px;color:var(--muted);line-height:1.4';
+        reasons.textContent='Why: '+flags.slice(0,2).join(' · ')+(flags.length>2?` (+${flags.length-2} more)`:'');
+        reasons.title=flags.join('\n');info.append(reasons);
+        if(flags.length>2){
+          const expand=document.createElement('button');expand.type='button';expand.textContent='Show all reasons';
+          expand.style.cssText='font-size:11px;padding:2px 6px;margin-top:4px';
+          let expanded=false;
+          expand.addEventListener('click',()=>{expanded=!expanded;reasons.textContent='Why: '+(expanded?flags.join(' · '):flags.slice(0,2).join(' · ')+` (+${flags.length-2} more)`);expand.textContent=expanded?'Show fewer':'Show all reasons';});
+          info.append(expand);
+        }
+      }
+      const link=document.createElement('a');link.textContent='Open original listing';
+      const url=String(c.listingUrl||'');
+      if(/^https:\/\//i.test(url)){link.href='#';link.style.cursor='pointer';link.addEventListener('click',ev=>{ev.preventDefault();openExternalUrl(url);});info.append(link);}
+      const approve=document.createElement('button');approve.type='button';approve.textContent=isUnverified?'Approve unverified manually':'Approve to Review';
+      approve.addEventListener('click',async()=>{
+        const accepted=confirm(`${isUnverified?'WARNING: This vacancy is UNVERIFIED. Check every mandatory requirement in the original advertisement before applying.\n\n':'Have you verified the original job description and its mandatory requirements?\n\n'}${c.title}\n${c.company} — ${c.place}\n\nAdd this job to Review?`);
+        if(!accepted)return;
+        approve.disabled=true;
+        try{
+          await persistQueue;
+          const result=await invokeNative('promote_candidate_to_review',{source:c.source,sourceId:c.sourceId,allowUnverified:isUnverified});
+          if(result.inserted){
+            const persisted=await invokeNative('db_load');
+            allJobs=persisted.jobs;
+            renderAll();
+            card.remove();candidateSeen--;
+            $('#candidate-panel-count').textContent=`${candidateSeen} awaiting approval shown; ${allJobs.length} jobs in Review dataset`;
+            await updateCandidateSummary();
+            toast(isUnverified?'Unverified job added — verify requirements before applying':'Candidate added to Review','ok');
+          }else{approve.textContent='Already in Review';toast('Already in Review');}
+        }catch(error){approve.disabled=false;toast('Approval failed: '+error,'err');}
+      });
+      // Split-pane selection is a read-only preview: approval still uses the existing Rust command.
+      const selectCandidate=()=>{
+        document.querySelectorAll('#candidate-panel-items .candidate-record').forEach(el=>el.classList.remove('selected'));
+        card.classList.add('selected');
+        const detail=document.getElementById('discover-detail');
+        if(!detail)return;
+        detail.replaceChildren();
+        const add=(tag,text,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=text;detail.append(el);return el;};
+        add('div',`${c.source||'Source inconnue'} · ${isUnverified?'À vérifier':'Éligible'}`,'detail-eyebrow');
+        add('h3',c.title||'Annonce sans titre');
+        add('p',[c.company,c.place,c.retrievedAt?'Vu '+c.retrievedAt.slice(0,10):''].filter(Boolean).join(' · '),'hint');
+        add('h4','Évaluation et justificatifs');
+        if(flags.length){const ul=document.createElement('ul');ul.className='detail-flags';for(const flag of flags){const li=document.createElement('li');li.textContent=flag;ul.append(li);}detail.append(ul);}
+        else add('p','Aucun motif détaillé disponible pour cette annonce. Vérifiez les conditions dans la source.','hint');
+        add('h4','Vérification avant candidature');
+        add('p',isUnverified?'Classification non vérifiée : contrôlez toutes les qualifications exigées sur le site de l’employeur.':'Classification initiale éligible : confirmez les exigences sur l’annonce originale.','hint');
+        if(/^https:\/\//i.test(url)){const original=document.createElement('button');original.type='button';original.textContent='Ouvrir l’annonce originale ↗';original.onclick=()=>openExternalUrl(url);detail.append(original);}
+        const addBtn=document.createElement('button');addBtn.type='button';addBtn.className='primary';addBtn.textContent=isUnverified?'Vérifier et ajouter à Review':'Ajouter à Review';addBtn.onclick=()=>approve.click();detail.append(addBtn);
+      };
+      card.classList.add('candidate-record');
+      card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Inspecter : '+(c.title||'annonce'));
+      card.addEventListener('click',e=>{if(e.target.closest('button,a,input,select'))return;selectCandidate();});
+      card.addEventListener('keydown',e=>{if(e.target!==card)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();selectCandidate();}});
+      card.append(info,approve);parent.append(card);
+      if(!parent.querySelector('.candidate-record.selected'))selectCandidate();
+    }
+    if(reset && !pending.length && rows.length<50){
+      const msg=document.createElement('p');msg.className='hint';msg.textContent='No new eligible candidates awaiting approval.';parent.append(msg);
+    }
+    loadButton.hidden=rows.length<50;
+    $('#candidate-panel-count').textContent=`${candidateSeen} awaiting approval shown; ${allJobs.length} jobs in Review dataset`;
+  }catch(error){console.error(error);toast('Candidate queue failed: '+error,'err');}
+  finally{candidateLoading=false;loadButton.disabled=false;}
+}
+async function openCandidates(){
+  if(!nativeReady){toast('SQLite is not ready','err');return;}
+  $('#refresh-results').hidden=false;
+  $('#candidate-panel').hidden=false;
+  await loadCandidatePage(true);
+}
+$('#btn-candidates').addEventListener('click',openCandidates);
+$('#refresh-view-candidates').addEventListener('click',openCandidates);
+$('#candidate-panel-close').addEventListener('click',()=>$('#candidate-panel').hidden=true);
+$('#candidate-next-page').addEventListener('click',()=>loadCandidatePage(false));
+$('#candidate-include-unverified').addEventListener('change',()=>loadCandidatePage(true));
+for(const id of ['candidate-source-filter','candidate-age-filter','candidate-hide-outside'])$('#'+id).addEventListener('change',()=>loadCandidatePage(true));
+$('#refresh-results-close').addEventListener('click',()=>$('#refresh-results').hidden=true);
+$('#refresh-view-unverified').addEventListener('click',()=>{
+  switchTab('review');
+  $('#audit-class').value='unverified';
+  $('#eligibility-audit').hidden=false;
+  loadAudit(true);
+});
+$('#refresh-view-sources').addEventListener('click',()=>{
+  $('#swiss-sources-panel').hidden=false;
+  renderSwissSources();renderCollectorDiagnostics();
+  $('#source-diagnostics').scrollIntoView({block:'nearest'});
+});
+$('#btn-export').addEventListener('click',exportBackup);
+$('#btn-migrate').addEventListener('click',async()=>{
+  const folder=prompt('Enter absolute path to your original Jobup folder containing data/ (or data/ itself):');
+  if(!folder)return;
+  try{
+    await persistQueue;
+    const backup=await invokeNative('db_backup_auto');
+    const result=await invokeNative('db_import_legacy',{folder});
+    const persisted=await invokeNative('db_load');
+    reviewed=migrateReviewed(persisted.reviewed);
+    allJobs=persisted.jobs;
+    committedReviews=JSON.parse(JSON.stringify(reviewed));
+    renderAll();
+    alert(`Import complete. Added: ${result.imported}, skipped: ${result.skipped}, conflicts: ${result.conflicts}, files: ${result.sourceFiles}. SQLite backup: ${backup}. Original files unchanged.`);
+  }catch(error){alert('Legacy import failed: '+error);}
+});
+$('#btn-import').addEventListener('click',()=>$('#rev-input').click());
+$('#rev-input').addEventListener('change',e=>{
+  if(e.target.files.length)importBackup(e.target.files[0]);
+  e.target.value='';
+});
+$('#btn-undo').addEventListener('click',undoImport);
+
+['f-status','f-date-from','f-date-to','f-search'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',renderReview);
+  el.addEventListener('change',renderReview);
+});
+$('#btn-clear').addEventListener('click',()=>{
+  $('#f-status').value='';$('#f-date-from').value='';$('#f-date-to').value='';$('#f-search').value='';
+  renderReview();
+});
+
+['t-status','t-search'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',renderTracker);
+  el.addEventListener('change',renderTracker);
+});
+
+$('#cal-prev').addEventListener('click',()=>{
+  calState.month--;if(calState.month<0){calState.month=11;calState.year--;}renderCalendar();
+});
+$('#cal-next').addEventListener('click',()=>{
+  calState.month++;if(calState.month>11){calState.month=0;calState.year++;}renderCalendar();
+});
+$('#cal-today').addEventListener('click',()=>{
+  const n = new Date();
+  calState.year  = n.getFullYear();
+  calState.month = n.getMonth();
+  pieState.period = 'day';
+  pieState.day    = todayStr();
+  renderCalendar();
+  renderPie();
+
+  const drawer = $('#day-drawer');
+  const alreadyOpenOnToday = drawer.classList.contains('open') && drawerDate === todayStr();
+  if (alreadyOpenOnToday) {
+    drawer.classList.remove('open');
+    drawerDate = null;
+  } else {
+    openDayDrawer(todayStr());
+  }
+
+  requestAnimationFrame(()=>{
+    const el = document.querySelector(`.cal-cell[data-date="${todayStr()}"]`);
+    if(el){
+      el.style.transition = 'box-shadow .15s, transform .15s';
+      el.style.boxShadow  = '0 0 0 3px var(--warn), 0 0 24px rgba(251,191,36,.55)';
+      el.style.transform  = 'scale(1.06)';
+      setTimeout(()=>{el.style.boxShadow='';el.style.transform='';},900);
+    }
+  });
+});
+$('#cal-metric').addEventListener('change',e=>{calState.metric=e.target.value;renderCalendar();});
+
+$$('#pie-tabs button').forEach(b=>b.addEventListener('click',()=>{
+  pieState.period=b.dataset.p;
+  if(pieState.period==='day'&&!pieState.day)pieState.day=todayStr();
+  renderPie();
+}));
+
+$('#day-close').addEventListener('click',()=>$('#day-drawer').classList.remove('open'));
+$('#day-status').addEventListener('change',renderDayList);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#day-drawer').classList.remove('open');});
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+loadState();
+startNativePersistence();
+switchTab('dashboard');
+if(!allJobs.length)$('#count').textContent='0 jobs loaded';
+
+
+/* Six-screen desktop shell: DOM relocation preserves handlers and Rust calls. */
+(()=>{
+  const pages={dashboard:'Dashboard',discover:'Découvrir des offres',tracker:'Mes candidatures',calendar:'Calendrier',sources:'Sources d’offres',settings:'Paramètres',review:'Vérification des offres'};
+  const candidate=document.getElementById('candidate-panel');
+  document.getElementById('discover-candidate-host').append(candidate);
+  candidate.hidden=false;
+  const sources=document.getElementById('swiss-sources-panel');
+  document.getElementById('sources-host').append(sources);
+  sources.hidden=false;
+  const calendar=document.querySelector('#view-dashboard .dash-row-cal');
+  if(calendar)document.getElementById('calendar-host').append(calendar);
+  const pageHeading=(page)=>{document.getElementById('desktop-page-title').textContent=pages[page]||'Masar';document.querySelectorAll('.side-link').forEach(b=>b.classList.toggle('active',b.dataset.page===page));};
+  window.jobupSyncNav=pageHeading;
+  const originalSwitch=switchTab;
+  window.jobupNavigate=(page)=>{
+    if(['dashboard','review','tracker'].includes(page)){originalSwitch(page);}
+    else {document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+page));if(page==='calendar'){renderCalendar();renderPie();}if(page==='sources'){renderSwissSources();renderCollectorDiagnostics();}}
+    pageHeading(page);
+  };
+  document.querySelectorAll('.side-link').forEach(b=>b.addEventListener('click',()=>{
+    const page=b.dataset.page;window.jobupNavigate(page);
+    if(page==='discover'){candidate.hidden=false;loadCandidatePage(true).catch(err=>console.warn('Candidate preview:',err));}
+    if(page==='sources')sources.hidden=false;
+  }));
+  document.getElementById('discover-reload').addEventListener('click',()=>loadCandidatePage(true));
+  document.getElementById('tracker-open-review').addEventListener('click',()=>window.jobupNavigate('review'));
+  document.getElementById('discover-open-review').addEventListener('click',()=>window.jobupNavigate('review'));
+  document.getElementById('settings-tools').addEventListener('click',()=>{const d=document.getElementById('desktop-tools');d.open=true;d.querySelector('summary').focus();});
+  document.getElementById('dash-go-discover').addEventListener('click',()=>window.jobupNavigate('discover'));
+  document.getElementById('dash-go-sources').addEventListener('click',()=>window.jobupNavigate('sources'));
+  document.getElementById('calendar-go-apps').addEventListener('click',()=>window.jobupNavigate('tracker'));
+  document.getElementById('settings-go-sources').addEventListener('click',()=>window.jobupNavigate('sources'));
+  document.getElementById('sources-open-tools').addEventListener('click',()=>{const d=document.getElementById('desktop-tools');d.open=true;d.querySelector('summary').focus();});
+  document.getElementById('settings-window').addEventListener('click',()=>{const d=document.getElementById('desktop-tools');d.open=true;document.getElementById('refresh-window').focus();});
+  const themeSelect=document.getElementById('settings-theme');
+  const theme=localStorage.getItem('jobup-ui-theme')==='light'?'light':'dark';
+  document.documentElement.dataset.theme=theme;themeSelect.value=theme;
+  themeSelect.addEventListener('change',()=>{document.documentElement.dataset.theme=themeSelect.value;localStorage.setItem('jobup-ui-theme',themeSelect.value);});
+  document.getElementById('sidebar-theme').addEventListener('click',()=>{themeSelect.value=themeSelect.value==='light'?'dark':'light';themeSelect.dispatchEvent(new Event('change'));});
+  document.getElementById('refresh-view-candidates').addEventListener('click',()=>window.jobupNavigate('discover'));
+  document.getElementById('refresh-view-sources').addEventListener('click',()=>window.jobupNavigate('sources'));
+  document.getElementById('btn-swiss-sources').addEventListener('click',()=>window.jobupNavigate('sources'));
+  window.jobupNavigate('dashboard');
+})();
+
+window.jobupReviewReloadLegacy=async function(){
+    const state=await invokeNative('db_load');
+    allJobs=state.jobs;
+    renderAll();
+};
+</script>
+<script src="search-step1.js"></script>
+<script src="review-step2.js"></script>
+<script src="applications-step3.js"></script>
+<script src="followups-step4.js"></script>
+<script src="dashboard-step5.js"></script>
+<script src="sources-step6.js"></script>
+<script src="settings-step7.js"></script>
+<script src="reset-step8.js"></script>
+<script src="search-ux-polish.js"></script>
+</body>
+</html>

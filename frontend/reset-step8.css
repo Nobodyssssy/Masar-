@@ -1,0 +1,14 @@
+.s8-danger-zone{margin-top:25px;border-top:1px solid var(--border);padding-top:19px}
+.s8-danger-zone h4{margin:0 0 8px;font-size:14px;color:var(--skip)}
+.s8-danger-zone p{font-size:12px;line-height:1.6;color:var(--muted);max-width:900px}
+.s8-danger-zone .s8-important{color:var(--fg);font-weight:550}
+.s8-danger-button{color:#fff!important;background:#a82b3a!important;border:1px solid #c74656!important;border-radius:8px;padding:9px 14px;font-weight:650}
+.s8-danger-button:hover:not(:disabled){background:#c23446!important}.s8-danger-button:disabled{opacity:.45;cursor:not-allowed}
+.s8-confirm-dialog{background:var(--panel);color:var(--fg);border:1px solid var(--border);border-radius:14px;padding:26px;max-width:min(560px,calc(100vw - 32px));box-shadow:0 30px 90px #0009}
+.s8-confirm-dialog::backdrop{background:#000b}.s8-confirm-dialog h3{margin:0 0 12px;font-size:19px}
+.s8-confirm-dialog p{color:var(--muted);font-size:13px;line-height:1.65}
+.s8-confirm-dialog .s8-ack{display:flex;gap:9px;align-items:start;font-size:13px;margin:19px 0;color:var(--fg)}
+.s8-confirm-dialog .s8-type{display:grid;gap:8px;font-size:13px;color:var(--fg)}
+.s8-confirm-dialog .s8-type input{max-width:100%;width:100%;padding:10px}
+.s8-dialog-actions{display:flex;justify-content:end;gap:10px;flex-wrap:wrap;margin-top:22px}
+.s8-confirm-dialog .s8-dialog-status{font-size:12px;overflow-wrap:anywhere}

@@ -1,0 +1,32 @@
+[package]
+name = "jobup_desktop"
+version = "0.1.0"
+description = "Offline-first local Jobup review desktop shell"
+authors = ["Jobup"]
+edition = "2021"
+
+[lib]
+name = "jobup_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+roxmltree = "0.20"
+webbrowser = "1"
+tauri = { version = "2", features = [] }
+serde_json = "1"
+regex = "1"
+html-escape = "0.2"
+
+rusqlite = { version = "0.32", features = ["bundled", "backup"] }
+serde = { version = "1", features = ["derive"] }
+blake3 = "1"
+unicode-normalization = "0.1"
+chrono = { version = "0.4", features = ["clock"] }
+scraper = "0.22"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+
+[dev-dependencies]
+tempfile = "3"

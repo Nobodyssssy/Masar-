@@ -1,0 +1,54 @@
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const {firefox}=require(path.join(root,'node_modules','playwright'));
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await firefox.launch({headless:true});
+ try{
+  const page=await browser.newPage({viewport:{width:1400,height:950}});
+  const calls=[];
+  await page.exposeFunction('record', (cmd,args)=>{calls.push({cmd,args});return cmd==='db_load'?{settings:{}}:cmd==='inspect_search_results'?{items:[],matched:0,unknownPublicationDates:0,unknownWorkloads:0,duplicateGroups:0}:cmd==='review_step2_inspect'?{items:[],total:0,overview:{discovered:1443,eligible:9,priority:20,unverified:761,excluded:673}}:{};});
+  await page.setContent('<html><head><meta charset="utf-8"></head><body><main></main><nav class="sidebar-nav"></nav></body></html>');
+  await page.evaluate(()=>window.__TAURI__={core:{invoke:(cmd,args)=>window.record(cmd,args)}});
+  await page.addScriptTag({content:fs.readFileSync(path.join(root,'frontend/search-step1.js'),'utf8')});
+  await page.waitForSelector('#search-preset');
+  assert.equal(await page.locator('#search-preset').inputValue(),'');
+  for(const source of ['indeed_ch','emploi_en_suisse','100000jobs','job_room'])assert.equal(await page.locator('[data-source="'+source+'"]').isDisabled(),true);
+  assert.equal(await page.locator('#search-profile option').count(),9);
+  await page.locator('#search-working-languages').selectOption(['en','fr']);
+  await page.locator('#search-language-all').check();
+  await page.locator('#search-max-grade').fill('80');
+  await page.locator('#search-filter-only').click();
+  await page.waitForTimeout(100);
+  let filters=calls.filter(c=>c.cmd==='inspect_search_results').at(-1).args.filters;
+  assert.deepEqual(filters.workingLanguages,['fr','en']);assert.equal(filters.languageAll,true);assert.equal(filters.maxGrade,80);assert.equal(filters.classification,'');
+  await page.locator('#search-all-discovered').click();await page.waitForTimeout(100);
+  filters=calls.filter(c=>c.cmd==='inspect_search_results').at(-1).args.filters;
+  assert.deepEqual(filters.sources,[]);assert.equal(filters.classification,'');assert.equal(filters.daysBack,undefined);assert.equal(filters.includeUnknownDates,true);
+  await page.locator('#search-profile').selectOption('My Current Eligibility');
+  assert.equal(await page.locator('#search-preset').inputValue(),'current');
+  assert.equal(await page.locator('#search-rule-editor').isVisible(),true);
+  await page.locator('[data-rule=mandatoryCfc]').uncheck();
+  await page.locator('#search-cantons').selectOption(['VS','VD']);
+  await page.locator('#search-radius').fill('20');await page.locator('#search-radius-center').fill('1950');
+  await page.locator('#search-filter-only').click();await page.waitForTimeout(100);
+  filters=calls.filter(c=>c.cmd==='inspect_search_results').at(-1).args.filters;
+  assert.equal(filters.eligibilityRules.mandatoryCfc,false);assert.equal(filters.radiusKm,20);assert.equal(filters.radiusCenter,'1950');assert.deepEqual(filters.cantons,['VD','VS']);
+  await page.locator('#search-profile').selectOption('');assert.equal(await page.locator('#search-preset').inputValue(),'');assert.equal(await page.locator('#search-rule-editor').isVisible(),false);
+  await page.locator('#search-date-from').fill('2026-09-01');await page.locator('#search-date-from').dispatchEvent('change');
+  assert.equal(await page.locator('#search-days').inputValue(),'custom');
+  await page.locator('#search-days').selectOption('1');assert.equal(await page.locator('#search-date-from').inputValue(),'');
+  await page.locator('#search-filter-only').click();await page.waitForTimeout(100);
+  await page.addScriptTag({content:fs.readFileSync(path.join(root,'frontend/review-step2.js'),'utf8')});
+  assert.equal(await page.locator('#triage-scope').inputValue(),'all');
+  await page.locator('#triage-scope').selectOption('priority');await page.waitForTimeout(100);
+  await page.locator('#triage-nav').click();await page.waitForTimeout(100);
+  const review=calls.filter(c=>c.cmd==='review_step2_inspect').at(-1).args.filter;
+  assert.equal(review.scope,'all');assert.equal(review.classification,null);assert.equal(review.daysBack,1);assert.equal(review.dateFrom,null);assert.equal(review.includeUnknownDates,false);
+  assert.match(await page.locator('#triage-filter-summary').textContent(),/24 h/);
+  assert.match(await page.locator('#triage-overview').textContent(),/ancien préréglage/);
+
+  console.log('PASS: Firefox launch, search controls, separate languages, profile selection, All Discovered and broad Review default. Mock bridge; native integration not verified.');
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

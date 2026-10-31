@@ -1,0 +1,37 @@
+/* Jobup Step 7: consolidated settings, non-destructive styles. */
+:root{--s7-font-size:13px}
+body{font-size:var(--s7-font-size)!important}
+.s7-settings{max-width:1540px;margin:0 auto}
+.s7-settings .s7-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:19px}
+.s7-settings .s7-heading h2{margin:0 0 4px;font-size:23px;letter-spacing:-.4px}
+.s7-settings .s7-heading p,.s7-card-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.s7-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:17px;align-items:start}
+.s7-jump{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:8px;display:flex;flex-direction:column;gap:3px;position:sticky;top:87px}
+.s7-jump a{display:block;color:var(--muted);padding:10px 12px;border-radius:7px;text-decoration:none;font-size:12px;font-weight:600}
+.s7-jump a:hover,.s7-jump a:focus-visible{background:var(--panel2);color:var(--fg)}
+.s7-sections{min-width:0;display:grid;gap:14px}
+.s7-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;min-width:0;scroll-margin-top:80px}
+.s7-card-head{display:flex;justify-content:space-between;gap:15px;align-items:start;padding-bottom:13px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.s7-card-head h3{font-size:15px;font-weight:680;margin:0 0 5px;color:var(--fg);letter-spacing:-.1px}
+.s7-tag{flex:none;display:inline-flex;padding:4px 9px;border:1px solid color-mix(in srgb,var(--accent) 36%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--accent) 9%,var(--panel2));color:var(--accent);font-size:10px;font-weight:700}
+.s7-tag.muted{border-color:var(--border);color:var(--muted);background:var(--panel2)}
+.s7-control{min-height:56px;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--border);padding:11px 0;font-size:12px}
+.s7-control:last-child{border-bottom:0}.s7-control>label,.s7-control>span:first-child{color:var(--fg);font-weight:600}
+.s7-control select{min-width:210px;max-width:100%;background:var(--panel2);color:var(--fg)}
+.s7-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.s7-inline input[type=number]{width:85px}.s7-inline select{min-width:230px}
+.s7-tip{color:var(--muted);font-size:11.5px;line-height:1.7;margin:12px 0 15px}
+.s7-value{color:var(--accent);font-weight:650;font-variant-numeric:tabular-nums}
+.s7-profile-list{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 15px}
+.s7-profile{padding:6px 10px;background:var(--panel2);border:1px solid var(--border);font-size:11.5px}
+.s7-eligibility,.s7-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.s7-eligibility>div,.s7-source-grid>div{display:flex;flex-direction:column;gap:7px;background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:13px}
+.s7-eligibility b,.s7-source-grid b{font-size:12px}.s7-eligibility span,.s7-source-grid span{color:var(--muted);font-size:11px;line-height:1.5}
+.s7-data-actions{display:flex;gap:8px;flex-wrap:wrap}.s7-backup-result{background:var(--panel2);border:1px solid var(--border);padding:12px;border-radius:8px;font-size:11px;margin:13px 0;overflow-wrap:anywhere}
+.s7-message{position:sticky;bottom:10px;z-index:3;padding:10px 13px;margin:18px 0;background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;font-size:11.5px}
+.s7-message.error{border-left-color:var(--skip);color:var(--skip)}
+:root[data-jobup-density=compact] .s7-card{padding:14px}:root[data-jobup-density=compact] .s7-control{min-height:40px;padding:7px 0}
+:root[data-jobup-density=compact] .s7-eligibility>div,:root[data-jobup-density=compact] .s7-source-grid>div{padding:9px}
+:root[data-jobup-density=compact] .s5-action-row,:root[data-jobup-density=compact] .app3-row,:root[data-jobup-density=compact] .r2-row,:root[data-jobup-density=compact] .s6-provider{padding-top:8px!important;padding-bottom:8px!important}
+:root[data-jobup-motion=reduce] *, :root[data-jobup-motion=reduce] *::before, :root[data-jobup-motion=reduce] *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+@media(max-width:1100px){.s7-layout{grid-template-columns:1fr}.s7-jump{position:static;flex-direction:row;flex-wrap:wrap}}
+@media(max-width:710px){.s7-eligibility,.s7-source-grid{grid-template-columns:1fr}.s7-card{padding:16px}.s7-control{align-items:stretch;flex-direction:column}.s7-control select{width:100%}.s7-card-head{align-items:start}}

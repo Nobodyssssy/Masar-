@@ -1,0 +1,70 @@
+/* Jobup collection UX polish. Pure presentation; old native commands stay registered. */
+/* Hide the legacy global refresh surface. Search owns the collection workflow. */
+#btn-refresh-native,
+#btn-refresh-cancel,
+#refresh-progress,
+#refresh-results,
+header.top label[for="refresh-window"],
+#refresh-window {display:none !important}
+
+/* Per-source selection cards remain aligned despite long provider names. */
+#view-search .search-source-grid {align-items:stretch;grid-auto-rows:minmax(106px,auto)}
+#view-search .search-source {
+  box-sizing:border-box;min-width:0;min-height:106px;height:100%;
+  display:grid;grid-template-columns:18px minmax(0,1fr);
+  grid-template-rows:auto 1fr auto;gap:4px 7px;align-content:start;align-items:start;
+}
+#view-search .search-source > input[type="checkbox"] {grid-column:1;grid-row:1;margin:3px 0 0}
+#view-search .search-source > span {grid-column:2;grid-row:1;font-weight:600;min-width:0;overflow-wrap:anywhere;line-height:1.3}
+#view-search .search-source > small {grid-column:2;grid-row:2;line-height:1.4;margin-top:2px;color:var(--muted,#94a3b8)}
+#view-search .search-source .search-official-site {
+  grid-column:2;grid-row:3;justify-self:start;align-self:end;margin:5px 0 0;
+  max-width:100%;min-width:0;white-space:normal;text-align:left;line-height:1.3
+}
+#view-search .search-source:has(input:disabled) {opacity:.85}
+#view-search .search-ux-website-explain {
+  margin:10px 0 12px;padding:9px 12px;border-radius:8px;
+  border:1px solid var(--border,#2b3b4f);
+  background:var(--panel2,#202d3a);font-size:11px;
+  line-height:1.55;color:var(--muted,#94a3b8)
+}
+
+/* Current source, elapsed time, and real completed-source counts. */
+#view-search #search-ux-hero {
+  display:flex;align-items:center;gap:12px;padding:12px 13px;margin:2px 0 10px;
+  border-radius:10px;border:1px solid var(--border,#2b3b4f);background:var(--panel2,#202d3a);
+  min-width:0
+}
+#view-search .search-ux-hero-content {display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+#view-search #search-ux-title {font-size:13px;line-height:1.3}
+#view-search #search-ux-detail {font-size:11px;line-height:1.4;color:var(--muted,#94a3b8);overflow-wrap:anywhere}
+#view-search #search-ux-time {font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;color:var(--muted,#94a3b8);font-variant-numeric:tabular-nums}
+#view-search .search-ux-ring {
+  display:inline-flex;flex:0 0 20px;width:20px;height:20px;box-sizing:border-box;
+  border:2px solid var(--border,#2b3b4f);border-top-color:var(--accent,#4d9bff);border-radius:50%;
+  align-items:center;justify-content:center
+}
+#view-search [data-state="running"] .search-ux-ring {animation:search-ux-spin .85s linear infinite}
+#view-search [data-state="done"] .search-ux-ring {border-color:var(--ok,#42d991)}
+#view-search [data-state="done"] .search-ux-ring::after {content:'✓';font-size:11px;color:var(--ok,#42d991);font-weight:700}
+#view-search [data-state="error"] .search-ux-ring {border-color:var(--skip,#fa7886)}
+#view-search [data-state="cancelled"] .search-ux-ring {border-color:var(--warn,#e9b554)}
+#view-search #search-ux-summary {font-size:11px;color:var(--muted,#94a3b8);font-variant-numeric:tabular-nums;margin:0 0 10px}
+#view-search #search-progress-panel.search-ux-busy {border-color:var(--accent,#4d9bff)}
+#view-search #search-progress-panel.search-ux-busy #search-progress:indeterminate {accent-color:var(--accent,#4d9bff)}
+#view-search #search-source-status .search-source-result {border-left:3px solid var(--border,#2b3b4f);line-height:1.45}
+#view-search #search-source-status [data-status="Succès"] {border-left-color:var(--ok,#42d991)}
+#view-search #search-source-status [data-status="Partiel"] {border-left-color:var(--warn,#e9b554)}
+#view-search #search-source-status [data-status="Bloqué"],
+#view-search #search-source-status [data-status="Échec"] {border-left-color:var(--skip,#fa7886)}
+@keyframes search-ux-spin {to {transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce) {#view-search [data-state="running"] .search-ux-ring {animation:none}}
+
+/* Source diagnostics rows: predictable spacing for adjacent provider entries. */
+#view-sources .s6-providers {gap:9px;overflow-x:hidden}
+#view-sources .s6-provider {box-sizing:border-box;min-width:0;min-height:90px;flex-shrink:0;gap:7px}
+#view-sources .s6-provider-name {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px;width:100%}
+#view-sources .s6-provider-name strong {min-width:0;overflow-wrap:anywhere;line-height:1.5}
+#view-sources .s6-provider-name .s6-badge {justify-self:end;max-width:100%;white-space:normal;text-align:center}
+#view-sources .s6-provider-stats,#view-sources .s6-provider-hint {line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:520px) {#view-sources .s6-provider-name {grid-template-columns:1fr}#view-sources .s6-provider-name .s6-badge {justify-self:start}}

@@ -1,0 +1,204 @@
+[
+  {
+    "id": "0",
+    "title": "Vendeur",
+    "company": "Commerce",
+    "place": "Sion",
+    "grades": [
+      40,
+      60
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "1",
+    "title": "Employé de commerce",
+    "company": "Bureau",
+    "place": "Lausanne",
+    "grades": [
+      70,
+      100
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "2",
+    "title": "Employé de commerce",
+    "company": "Bureau",
+    "place": "Lausanne",
+    "grades": [
+      40,
+      60
+    ],
+    "python_keep": false,
+    "python_reason": "grade 60 < 70 (VD)"
+  },
+  {
+    "id": "3",
+    "title": "Serveur",
+    "company": "Restaurant B",
+    "place": "Sion",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "excluded 'restaurant'"
+  },
+  {
+    "id": "4",
+    "title": "Employé de vente",
+    "company": "Boutique",
+    "place": "Sierre",
+    "grades": [
+      40
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "5",
+    "title": "Caissier",
+    "company": "Boutique",
+    "place": "Conthey",
+    "grades": [
+      80
+    ],
+    "python_keep": false,
+    "python_reason": "city not in whitelist: Conthey"
+  },
+  {
+    "id": "6",
+    "title": "Assistant administratif",
+    "company": "APEA",
+    "place": "Ardon",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "city not in whitelist: Ardon"
+  },
+  {
+    "id": "7",
+    "title": "Assistant administratif",
+    "company": "APEA",
+    "place": "Vétroz",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "city not in whitelist: Vétroz"
+  },
+  {
+    "id": "8",
+    "title": "Logisticien",
+    "company": "Stock",
+    "place": "Monthey",
+    "grades": [
+      20,
+      40
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "9",
+    "title": "Technicien",
+    "company": "Entreprise",
+    "place": "Sion",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "excluded 'technicien'"
+  },
+  {
+    "id": "10",
+    "title": "Chauffeur-livreur",
+    "company": "Livraison",
+    "place": "Martigny",
+    "grades": [
+      100
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "11",
+    "title": "Commercial",
+    "company": "Maison",
+    "place": "Vevey",
+    "grades": [
+      70
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "12",
+    "title": "Directeur",
+    "company": "Maison",
+    "place": "Sion",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "excluded 'directeur'"
+  },
+  {
+    "id": "13",
+    "title": "Assistant commercial",
+    "company": "Boutique",
+    "place": "Unknown",
+    "grades": [
+      100
+    ],
+    "python_keep": false,
+    "python_reason": "city not in whitelist: Unknown"
+  },
+  {
+    "id": "14",
+    "title": "Employé de vente",
+    "company": "Shop",
+    "place": "Renens",
+    "grades": [
+      69
+    ],
+    "python_keep": false,
+    "python_reason": "grade 69 < 70 (VD)"
+  },
+  {
+    "id": "15",
+    "title": "Employé de vente",
+    "company": "Shop",
+    "place": "Renens",
+    "grades": [
+      70
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "16",
+    "title": "Gestionnaire",
+    "company": "Boutique",
+    "place": "Crans-Montana",
+    "grades": [
+      40
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  },
+  {
+    "id": "17",
+    "title": "Comptable",
+    "company": "Bureau Fiduciaire",
+    "place": "Sion",
+    "grades": [
+      100
+    ],
+    "python_keep": true,
+    "python_reason": "kept"
+  }
+]

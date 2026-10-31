@@ -1,0 +1,17 @@
+{
+  "name": "jobup-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "prepare:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File ./prepare-runtime.ps1",
+    "test:frontend": "node tests/ui-smoke.cjs && node frontend/firefox-job-collectors.cjs --self-test"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "playwright": "^1.64.1"
+  }
+}
