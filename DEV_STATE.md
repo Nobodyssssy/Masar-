@@ -20,3 +20,5 @@
 - Original local branches/commits were preserved, not rewritten. A private Git bundle and required data/settings snapshots are part of the separately verified recovery backup.
 - No personal database, CV, browser profile, credentials, installer or generated dependencies are committed.
 - See THIRD_PARTY_NOTICES.md for independent collector provenance and applicable third-party notices. Original source has no general open-source reuse licence selected.
+
+- Publication audit removed two obsolete source backup copies; active application source is unchanged. Recovery verification must complete before generated workspace artifacts are deleted.
